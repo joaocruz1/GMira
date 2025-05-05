@@ -17,16 +17,24 @@ const inter = Inter({
   display: "swap",
 })
 
+
 export const metadata: Metadata = {
   title: "GMira Marketing Digital - Sua marca no alvo certo!",
   description: "Estratégia, conteúdo e tráfego pago para negócios que querem crescer no digital",
+  
   openGraph: {
-    images : "/image.svg"
-  },
-
-  twitter: {
-    card: "summary_large_image",
-    images: ["/metaimage.svg"], // Usa a mesma imagem para o Twitter
+    title: "GMira Marketing Digital - Sua marca no alvo certo!", 
+    description: "Estratégia, conteúdo e tráfego pago para negócios que querem crescer no digital", 
+    type: "website",
+    url: "https://www.gmiramkt.com", // Substitua pela URL do seu site
+    images: [
+      {
+        url: "4.png", // Caminho relativo (recomendo usar PNG/JPG em vez de SVG)
+        width: 600, // Dimensões recomendadas para Open Graph
+        height: 600,
+        alt: "GMira Marketing Digital - Estratégias que impulsionam seu negócio",
+      },
+    ],
   },
 };
 
