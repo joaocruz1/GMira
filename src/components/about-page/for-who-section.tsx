@@ -63,9 +63,7 @@ export default function ForWhoSection({ onCtaClick }: ForWhoSectionProps) {
       <div className="container mx-auto px-4 relative z-10">
         <FadeIn>
           <h2 className="text-3xl md:text-5xl font-bold text-center mb-16">
-            PARA QUEM É A{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-fuchsia-500">GMIRA</span>
-            ?
+            PARA QUEM É A <span className="text-purple-600">GMIRA</span>?
           </h2>
         </FadeIn>
 
@@ -73,10 +71,12 @@ export default function ForWhoSection({ onCtaClick }: ForWhoSectionProps) {
           {/* Para quem é */}
           <div className="space-y-6">
             <FadeIn delay={0.1}>
-              <div className="bg-gradient-to-r from-purple-600/30 to-purple-600/10 backdrop-blur-md p-4 rounded-lg inline-block mb-4">
-                <Check className="h-8 w-8 text-purple-400" />
+              <div className="flex items-center gap-4 mb-6">
+                <div className="bg-gradient-to-r from-purple-600/30 to-purple-600/10 backdrop-blur-md p-4 rounded-lg">
+                  <Check className="h-8 w-8 text-purple-400" />
+                </div>
+                <h3 className="text-2xl font-bold">Ideal para você que:</h3>
               </div>
-              <h3 className="text-2xl font-bold mb-6">Ideal para você que:</h3>
             </FadeIn>
 
             <div className="space-y-4">
@@ -92,7 +92,7 @@ export default function ForWhoSection({ onCtaClick }: ForWhoSectionProps) {
                   >
                     <Card className="bg-gradient-to-r from-purple-900/80 to-purple-800/60 backdrop-blur-sm p-6 rounded-xl border-l-4 border-purple-500 hover:border-purple-400 transition-all duration-300">
                       <div className="flex items-start gap-4">
-                        <div className="bg-purple-500/30 p-2 rounded-full mt-1">
+                        <div className="bg-purple-500/30 p-2 rounded-full flex-shrink-0">
                           <Check className="h-5 w-5 text-purple-300" />
                         </div>
                         <p className="text-white text-lg">{item}</p>
@@ -107,10 +107,12 @@ export default function ForWhoSection({ onCtaClick }: ForWhoSectionProps) {
           {/* Não é para você */}
           <div className="space-y-6">
             <FadeIn delay={0.3}>
-              <div className="bg-gradient-to-r from-red-600/30 to-red-600/10 backdrop-blur-md p-4 rounded-lg inline-block mb-4">
-                <X className="h-8 w-8 text-red-400" />
+              <div className="flex items-center gap-4 mb-6">
+                <div className="bg-gradient-to-r from-red-600/30 to-red-600/10 backdrop-blur-md p-4 rounded-lg">
+                  <X className="h-8 w-8 text-red-400" />
+                </div>
+                <h3 className="text-2xl font-bold">Não é para você se:</h3>
               </div>
-              <h3 className="text-2xl font-bold mb-6">Não é para você se:</h3>
             </FadeIn>
 
             <div className="space-y-4">
@@ -126,7 +128,7 @@ export default function ForWhoSection({ onCtaClick }: ForWhoSectionProps) {
                   >
                     <Card className="bg-gradient-to-r from-red-900/30 to-red-800/20 backdrop-blur-sm p-6 rounded-xl border-l-4 border-red-500/50 hover:border-red-400/50 transition-all duration-300">
                       <div className="flex items-start gap-4">
-                        <div className="bg-red-500/30 p-2 rounded-full mt-1">
+                        <div className="bg-red-500/30 p-2 rounded-full flex-shrink-0">
                           <X className="h-5 w-5 text-red-300" />
                         </div>
                         <p className="text-white text-lg">{item}</p>

@@ -20,6 +20,17 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "GMira Marketing Digital - Sua marca no alvo certo!",
   description: "Estratégia, conteúdo e tráfego pago para negócios que querem crescer no digital",
+  openGraph: {
+    images: [
+      {
+        url: "/metaimage.svg", 
+        width: 1200,
+        height: 630,
+        alt: "GMira - Marketing Digital de Resultados",
+      },
+    ],
+  },
+
 }
 
 export default function RootLayout({
