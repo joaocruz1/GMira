@@ -19,8 +19,11 @@ export default function Home() {
 
   // Função para lidar com o clique no botão CTA
   const handleCtaClick = () => {
-    console.log("CTA clicked")
-    // Aqui você pode adicionar a lógica para o botão, como abrir um modal ou redirecionar
+    const phoneNumber = "553599574977"; 
+    const defaultMessage = "Olá, gostaria de mais informações!"; 
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(defaultMessage)}`;
+    
+    window.open(whatsappUrl, "_blank"); 
   }
 
   return (
