@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     url: "https://www.gmiramkt.com", 
     images: [
       {
-        url: "https://www.gmiramkt.com/4.png", 
+        url: "https://www.gmiramkt.com/meta.png", 
         width: 600, 
         height: 600,
         alt: "GMira Marketing Digital - Estratégias que impulsionam seu negócio",
