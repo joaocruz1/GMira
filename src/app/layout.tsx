@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     url: "https://www.gmiramkt.com", // Substitua pela URL do seu site
     images: [
       {
-        url: "4.png", // Caminho relativo (recomendo usar PNG/JPG em vez de SVG)
+        url: "/4.png", // Caminho relativo (recomendo usar PNG/JPG em vez de SVG)
         width: 600, // Dimensões recomendadas para Open Graph
         height: 600,
         alt: "GMira Marketing Digital - Estratégias que impulsionam seu negócio",
