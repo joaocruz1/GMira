@@ -26,11 +26,11 @@ export const metadata: Metadata = {
     title: "GMira Marketing Digital - Sua marca no alvo certo!", 
     description: "Estratégia, conteúdo e tráfego pago para negócios que querem crescer no digital", 
     type: "website",
-    url: "https://www.gmiramkt.com", // Substitua pela URL do seu site
+    url: "https://www.gmiramkt.com", 
     images: [
       {
-        url: "/4.png", // Caminho relativo (recomendo usar PNG/JPG em vez de SVG)
-        width: 600, // Dimensões recomendadas para Open Graph
+        url: "https://www.gmiramkt.com/4.png", 
+        width: 600, 
         height: 600,
         alt: "GMira Marketing Digital - Estratégias que impulsionam seu negócio",
       },
