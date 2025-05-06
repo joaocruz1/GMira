@@ -31,7 +31,7 @@ function HeroSection({ onCtaClick, scrollYProgress }: HeroSectionProps) {
   }
 
   return (
-    <section className="w-full bg-white min-h-[90vh] flex items-center">
+    <section className="w-full bg-black min-h-[90vh] flex items-center">
       <div className="container mx-auto flex flex-col md:flex-row items-center">
         {/* Espaço vazio à esquerda - ocupa 1/5 da tela */}
         <div className="hidden md:block md:w-1/5"></div>
