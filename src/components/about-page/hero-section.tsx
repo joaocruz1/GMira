@@ -31,10 +31,10 @@ function HeroSection({ onCtaClick, scrollYProgress }: HeroSectionProps) {
   }
 
   return (
-    <section className="w-full bg-black min-h-[90vh] flex items-center">
+    <section className="container mx-auto px-4 py-20 md:py-32 flex flex-col md:flex-row items-center gap-8 min-h-[90vh] relative ">
       <div className="container mx-auto flex flex-col md:flex-row items-center">
         {/* Espaço vazio à esquerda - ocupa 1/5 da tela */}
-        <div className="hidden md:block md:w-1/5"></div>
+        <div className="hidden md:block md:w-1/7"></div>
         
         {/* Conteúdo de texto - ocupa 2/5 da tela e fica mais à direita */}
         <motion.div 
@@ -42,7 +42,7 @@ function HeroSection({ onCtaClick, scrollYProgress }: HeroSectionProps) {
           style={{ y: titleY }}
         >
           <FadeIn>
-            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight text-white-900">
               SUA MARCA NO{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-600 relative inline-block">
                 ALVO
@@ -53,13 +53,13 @@ function HeroSection({ onCtaClick, scrollYProgress }: HeroSectionProps) {
           </FadeIn>
 
           <FadeIn delay={0.2}>
-            <p className="text-lg md:text-xl text-gray-600 max-w-2xl">
+            <p className="text-lg md:text-xl text-white-600 max-w-2xl">
               Estratégia, conteúdo e tráfego pago para negócios que querem crescer no digital com resultados mensuráveis.
             </p>
           </FadeIn>
 
           <FadeIn delay={0.4}>
-            <p className="text-gray-500 text-lg">
+            <p className="text-white-500 text-lg">
               Gestão de redes sociais, anúncios, design e vídeos com um plano sob medida para seu negócio.
             </p>
           </FadeIn>
@@ -82,7 +82,7 @@ function HeroSection({ onCtaClick, scrollYProgress }: HeroSectionProps) {
 
         {/* Imagem - ocupa 2/5 da tela */}
         <motion.div
-          className="md:w-2/5 flex justify-center z-10 px-4 md:px-0"
+          className="justify-center md:w-2/5 flex  z-10 px-4 md:px-0"
           style={{ y: imageY }}
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
