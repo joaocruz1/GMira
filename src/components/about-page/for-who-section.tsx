@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ChevronRight, Check, X } from "lucide-react"
@@ -10,7 +11,7 @@ interface ForWhoSectionProps {
   onCtaClick: () => void
 }
 
-export default function ForWhoSection({ onCtaClick }: ForWhoSectionProps) {
+function ForWhoSection({ onCtaClick }: ForWhoSectionProps) {
   // Pulse animation for the CTA button
   const pulseVariants = {
     initial: { scale: 1 },
@@ -27,38 +28,6 @@ export default function ForWhoSection({ onCtaClick }: ForWhoSectionProps) {
   return (
     <section className="py-20 md:py-32 relative">
       <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-950/10 to-black" />
-
-      {/* Parallax background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute top-1/3 left-1/5 w-72 h-72 rounded-full bg-purple-600/10 blur-3xl"
-          animate={{
-            y: [0, -20, 0],
-            x: [0, 10, 0],
-            opacity: [0.2, 0.3, 0.2],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-          }}
-        />
-
-        <motion.div
-          className="absolute bottom-1/4 right-1/5 w-96 h-96 rounded-full bg-fuchsia-600/10 blur-3xl"
-          animate={{
-            y: [0, 30, 0],
-            x: [0, -15, 0],
-            opacity: [0.1, 0.2, 0.1],
-          }}
-          transition={{
-            duration: 15,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-            delay: 2,
-          }}
-        />
-      </div>
 
       <div className="container mx-auto px-4 relative z-10">
         <FadeIn>
@@ -174,3 +143,5 @@ const notForWho = [
   "Não está disposto a investir em comunicação",
   "Quer 'apenas post bonitinho' sem estratégia por trás",
 ]
+
+export default memo(ForWhoSection)

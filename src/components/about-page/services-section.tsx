@@ -1,11 +1,12 @@
 "use client"
 
+import { memo } from "react"
 import { Card } from "@/components/ui/card"
 import { Target, BarChart2, PenTool, Layout, FileText, Users } from "lucide-react"
 import FadeIn from "@/components/ui/fade-in"
 import { motion } from "framer-motion"
 
-export default function ServicesSection() {
+function ServicesSection() {
   return (
     <section className="py-20 md:py-32 relative">
       <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-950/10 to-black" />
@@ -86,3 +87,5 @@ const services = [
     icon: <Target className="h-8 w-8 text-white" />,
   },
 ]
+
+export default memo(ServicesSection)
