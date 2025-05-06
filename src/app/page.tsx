@@ -32,8 +32,8 @@ export default function Home() {
       <ParallaxBackground scrollYProgress={scrollYProgress} />
       <div className="relative z-10">
         <HeroSection onCtaClick={handleCtaClick} scrollYProgress={scrollYProgress} />
-        <ServicesSection />
         <AboutSection />
+        <ServicesSection onCtaClick={handleCtaClick} />
         <ForWhoSection onCtaClick={handleCtaClick} />
         <CtaSection onCtaClick={handleCtaClick} />
         <Footer /> 

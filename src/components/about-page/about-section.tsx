@@ -1,10 +1,11 @@
 "use client"
 
+import { memo } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import FadeIn from "@/components/ui/fade-in"
 
-export default function AboutSection() {
+function AboutSection() {
   return (
     <section className="py-20 md:py-32 relative">
       <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-950/5 to-black" />
@@ -17,8 +18,7 @@ export default function AboutSection() {
         </FadeIn>
 
         <div className="flex flex-col lg:flex-row items-center gap-12 max-w-6xl mx-auto">
-          <FadeIn delay={0.2} >
-            {/* Simplificado: apenas com efeito de scale */}
+          <FadeIn delay={0.2}>
             <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }} className="relative">
               <Image
                 src="/fotoperfil.svg"
@@ -26,6 +26,7 @@ export default function AboutSection() {
                 width={500}
                 height={500}
                 className="w-full h-auto rounded-2xl"
+                loading="lazy"
               />
             </motion.div>
           </FadeIn>
@@ -69,3 +70,5 @@ export default function AboutSection() {
     </section>
   )
 }
+
+export default memo(AboutSection)

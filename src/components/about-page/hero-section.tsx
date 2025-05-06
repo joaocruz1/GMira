@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react"
 import { motion, useTransform, type MotionValue } from "framer-motion"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -11,7 +12,7 @@ interface HeroSectionProps {
   scrollYProgress: MotionValue<number>
 }
 
-export default function HeroSection({ onCtaClick, scrollYProgress }: HeroSectionProps) {
+function HeroSection({ onCtaClick, scrollYProgress }: HeroSectionProps) {
   // Parallax effect for hero elements
   const titleY = useTransform(scrollYProgress, [0, 0.2], [0, -50])
   const imageY = useTransform(scrollYProgress, [0, 0.2], [0, -30])
@@ -78,7 +79,6 @@ export default function HeroSection({ onCtaClick, scrollYProgress }: HeroSection
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, delay: 0.3 }}
       >
-        {/* Simplificado: apenas com efeito de scale */}
         <motion.div
           className="relative w-full max-w-md"
           whileHover={{
@@ -86,9 +86,11 @@ export default function HeroSection({ onCtaClick, scrollYProgress }: HeroSection
             transition: { duration: 0.3 },
           }}
         >
-          <Image src="/GMira.svg" alt="GMira Logo" width={400} height={400} className="w-full h-auto" />
+          <Image src="https://www.gmiramkt.com/GMira.svg" alt="GMira Logo" width={400} height={400} className="w-full h-auto" priority />
         </motion.div>
       </motion.div>
     </section>
   )
 }
+
+export default memo(HeroSection)

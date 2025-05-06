@@ -1,11 +1,31 @@
 "use client"
 
+import { memo } from "react"
 import { Card } from "@/components/ui/card"
-import { Target, BarChart2, PenTool, Layout, FileText, Users } from "lucide-react"
+import { Target, BarChart2, PenTool, Layout, FileText, Users, ChevronRight } from "lucide-react"
 import FadeIn from "@/components/ui/fade-in"
 import { motion } from "framer-motion"
+import { Button } from "../ui/button"
 
-export default function ServicesSection() {
+interface SercicesSectionProps {
+  onCtaClick: () => void
+}
+
+function ServicesSection({onCtaClick}:SercicesSectionProps) {
+
+    // Pulse animation for the CTA button
+    const pulseVariants = {
+      initial: { scale: 1 },
+      animate: {
+        scale: [1, 1.03, 1],
+        transition: {
+          duration: 2,
+          repeat: Number.POSITIVE_INFINITY,
+          repeatType: "loop" as const,
+        },
+      },
+    }
+
   return (
     <section className="py-20 md:py-32 relative">
       <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-950/10 to-black" />
@@ -48,7 +68,20 @@ export default function ServicesSection() {
               </motion.div>
             </FadeIn>
           ))}
+        
         </div>
+        <div className="pt-8 flex justify-center items-center">
+            <motion.div variants={pulseVariants} initial="initial" animate="animate">
+              <Button
+                size="lg"
+                onClick={onCtaClick}
+                className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white text-lg px-10 py-8 rounded-xl shadow-glow hover:shadow-glow-hover transition-all duration-300 border border-purple-500/30"
+              >
+                <span className="text-xl font-bold tracking-wide">QUERO SABER MAIS</span>
+                <ChevronRight className="ml-2 h-6 w-6" />
+              </Button>
+            </motion.div>
+          </div>
       </div>
     </section>
   )
@@ -86,3 +119,5 @@ const services = [
     icon: <Target className="h-8 w-8 text-white" />,
   },
 ]
+
+export default memo(ServicesSection)

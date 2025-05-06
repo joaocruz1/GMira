@@ -1,8 +1,10 @@
 "use client"
+
+import { memo } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 
-export default function Footer() {
+function Footer() {
   return (
     <footer className="bg-black/80 backdrop-blur-md border-t border-white/5 py-8">
       <div className="container mx-auto px-4 text-center">
@@ -13,6 +15,7 @@ export default function Footer() {
             width={100}
             height={30}
             className="h-12 w-auto mx-auto mb-4"
+            loading="lazy"
           />
           <p className="text-gray-400">
             © {new Date().getFullYear()} GMira Marketing Digital. Todos os direitos reservados.
@@ -22,3 +25,5 @@ export default function Footer() {
     </footer>
   )
 }
+
+export default memo(Footer)

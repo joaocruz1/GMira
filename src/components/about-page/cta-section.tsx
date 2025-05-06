@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react"
 import { Button } from "@/components/ui/button"
 import { ChevronRight } from "lucide-react"
 import FadeIn from "@/components/ui/fade-in"
@@ -9,7 +10,7 @@ interface CtaSectionProps {
   onCtaClick: () => void
 }
 
-export default function CtaSection({ onCtaClick }: CtaSectionProps) {
+function CtaSection({ onCtaClick }: CtaSectionProps) {
   // Pulse animation for the CTA button
   const pulseVariants = {
     initial: { scale: 1 },
@@ -27,36 +28,6 @@ export default function CtaSection({ onCtaClick }: CtaSectionProps) {
     <section className="py-20 md:py-32 relative">
       <div className="absolute inset-0 bg-gradient-to-b from-black/80 to-purple-950/50" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(138,43,226,0.15),transparent_70%)]" />
-
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-purple-600/10 blur-3xl"
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-          }}
-        />
-
-        <motion.div
-          className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-fuchsia-600/10 blur-3xl"
-          animate={{
-            y: [0, 30, 0],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-            delay: 1,
-          }}
-        />
-      </div>
 
       <div className="container mx-auto px-4 text-center relative z-10">
         <FadeIn>
@@ -85,3 +56,5 @@ export default function CtaSection({ onCtaClick }: CtaSectionProps) {
     </section>
   )
 }
+
+export default memo(CtaSection)
