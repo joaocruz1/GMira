@@ -86,7 +86,7 @@ function HeroSection({ onCtaClick, scrollYProgress }: HeroSectionProps) {
             transition: { duration: 0.3 },
           }}
         >
-          <Image src="/GMira.svg" alt="GMira Logo" width={400} height={400} className="w-full h-auto" priority />
+          <Image src="https://www.gmiramkt.com/GMira.svg" alt="GMira Logo" width={400} height={400} className="w-full h-auto" priority />
         </motion.div>
       </motion.div>
     </section>
