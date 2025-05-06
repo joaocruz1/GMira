@@ -32,9 +32,9 @@ export default function Home() {
       <ParallaxBackground scrollYProgress={scrollYProgress} />
       <div className="relative z-10">
         <HeroSection onCtaClick={handleCtaClick} scrollYProgress={scrollYProgress} />
-        <AboutSection />
         <ServicesSection onCtaClick={handleCtaClick} />
         <ForWhoSection onCtaClick={handleCtaClick} />
+        <AboutSection />
         <CtaSection onCtaClick={handleCtaClick} />
         <Footer /> 
       </div>
