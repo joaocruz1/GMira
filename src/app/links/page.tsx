@@ -68,9 +68,9 @@ export default function LinksPage() {
 
         {/* Grid de redes sociais */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-16 w-full max-w-3xl">
-          <SocialLink type="instagram" username="@gmiramarketing" href="https://instagram.com/gmiramarketing" />
+          <SocialLink type="instagram" username="@gmiramarketing" href="https://www.instagram.com/gustavomira.mkt/" />
 
-          <SocialLink type="whatsapp" username="WhatsApp" href="https://wa.me/seunumero" />
+          <SocialLink type="whatsapp" username="WhatsApp" href="https://wa.me/553599574977" />
 
           <SocialLink type="linkedin" username="GMira Studio" href="https://linkedin.com/in/gmira" />
 
