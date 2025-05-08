@@ -24,13 +24,13 @@ export default function LinksPage() {
         {/* Logo circular com brilho */}
         <div className="mb-6 relative">
           <div className="absolute inset-0 rounded-full bg-purple-600 blur-xl opacity-60"></div>
-          <div className="relative bg-[#0c0117] rounded-full p-2 border-2 border-purple-500/30">
+          <div className="relative bg-[#0c0117] rounded-full p-2 border-2 border-purple-500/30 w-24 h-24 overflow-hidden">
             <Image
-              src="/fotoperfil.svg"
+              src="/profilepicture.png"
               alt="GMira Logo"
               width={100}
               height={100}
-              className="h-24 w-24 rounded-full p-2"
+              className="w-full h-full object-cover scale-121"
               priority
             />
           </div>

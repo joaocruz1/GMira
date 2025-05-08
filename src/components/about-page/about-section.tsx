@@ -21,7 +21,7 @@ function AboutSection() {
           <FadeIn delay={0.2}>
             <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }} className="relative">
               <Image
-                src="/fotoperfil.svg"
+                src="/profilepicture.png"
                 alt="Gustavo Mira"
                 width={500}
                 height={500}
