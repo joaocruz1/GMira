@@ -10,7 +10,7 @@ function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="bg-white dark:bg-black/80 backdrop-blur-md border-t border-purple-100 dark:border-white/5 pt-16 pb-8 transition-colors duration-300 shadow-sm">
+    <footer className="bg-black/80 backdrop-blur-md border-t border-white/5 pt-16 pb-8 transition-colors duration-300 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           {/* Logo e Descrição */}
@@ -22,14 +22,14 @@ function Footer() {
               viewport={{ once: true }}
             >
               <Image
-                src="/img/logos/logoBlack.png"
+                src="/img/logos/logoWhite.png"
                 alt="GMira Marketing Digital"
                 width={150}
                 height={50}
                 className="h-12 w-auto mb-4"
                 loading="lazy"
               />
-              <p className="text-indigo-700 dark:text-gray-400 text-sm">
+              <p className=":text-gray-400 text-sm">
                 Estratégia, conteúdo e tráfego pago para negócios que querem crescer no digital com resultados
                 mensuráveis.
               </p>
@@ -43,7 +43,7 @@ function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
               viewport={{ once: true }}
-              className="text-indigo-900 dark:text-white font-bold mb-4 text-lg"
+              className="text-white font-bold mb-4 text-lg"
             >
               Links Rápidos
             </motion.h3>
@@ -58,7 +58,7 @@ function Footer() {
                 >
                   <Link
                     href={link.href}
-                    className="text-indigo-700 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-400 transition-colors duration-300 text-sm"
+                    className=" text-gray-400 hover:text-purple-400 transition-colors duration-300 text-sm"
                   >
                     {link.label}
                   </Link>
@@ -74,7 +74,7 @@ function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               viewport={{ once: true }}
-              className="text-indigo-900 dark:text-white font-bold mb-4 text-lg"
+              className="text-white font-bold mb-4 text-lg"
             >
               Serviços
             </motion.h3>
@@ -89,7 +89,7 @@ function Footer() {
                 >
                   <Link
                     href="/servicos"
-                    className="text-indigo-700 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-400 transition-colors duration-300 text-sm"
+                    className= "text-gray-400 hover:text-purple-400 transition-colors duration-300 text-sm"
                   >
                     {service}
                   </Link>
@@ -105,7 +105,7 @@ function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
               viewport={{ once: true }}
-              className="text-indigo-900 dark:text-white font-bold mb-4 text-lg"
+              className="text-white font-bold mb-4 text-lg"
             >
               Contato
             </motion.h3>
@@ -119,10 +119,10 @@ function Footer() {
                   viewport={{ once: true }}
                   className="flex items-center gap-2"
                 >
-                  <span className="text-primary">{info.icon}</span>
+                  <span className="text-white">{info.icon}</span>
                   <a
                     href={info.href}
-                    className="text-indigo-700 hover:text-purple-700 dark:text-gray-400 dark:hover:text-purple-400 transition-colors duration-300 text-sm"
+                    className="text-gray-400 hover:text-purple-400 transition-colors duration-300 text-sm"
                   >
                     {info.text}
                   </a>

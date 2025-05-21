@@ -45,7 +45,7 @@ function ServicesCarousel() {
           <div className="overflow-hidden rounded-xl">
             <motion.div
               className="flex"
-              animate={{ x: `-${activeIndex * 100}%` }}
+              animate={{ x: `-${activeIndex * (100 / services.length)}%` }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               style={{ width: `${services.length * 100}%` }}
             >

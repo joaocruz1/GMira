@@ -36,9 +36,6 @@ const CtaSection = dynamic(() => import("@/components/home/cta-section"), {
   loading: () => <LoadingFallback />,
 })
 
-const ProcessSection = dynamic(() => import("@/components/home/process-section"), {
-  loading: () => <LoadingFallback />,
-})
 
 const PortfolioPreview = dynamic(() => import("@/components/home/portfolio-preview"), {
   loading: () => <LoadingFallback />,
@@ -63,7 +60,6 @@ export default function Home() {
             <HeroSection />
             <div className="relative z-20">
               <StatsSection />
-              <ProcessSection />
               <FeaturesShowcase />
               <ServicesCarousel />
               <PortfolioPreview />

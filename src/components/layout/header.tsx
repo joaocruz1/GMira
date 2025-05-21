@@ -52,7 +52,7 @@ function Header() {
           {/* Logo */}
           <Link href="/" className="relative z-50">
             <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.2 }}>
-              <Image src="/GMira.svg" alt="GMira Logo" width={120} height={40} className="h-10 w-auto" priority />
+              <Image src="/img/logos/logoWhite.png" alt="GMira Logo" width={120} height={40} className="h-10 w-auto" priority />
             </motion.div>
           </Link>
 
