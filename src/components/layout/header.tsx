@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { usePathname } from "next/navigation"
-import ThemeToggle from "../theme/theme-toggle"
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -29,10 +28,23 @@ function Header() {
     setIsOpen(false)
   }, [pathname])
 
+  // Impedir rolagem quando o menu estiver aberto
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [isOpen])
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-white/90 dark:bg-black/80 backdrop-blur-md shadow-md py-3" : "bg-transparent py-5"
+        scrolled ? "bg-black/80 backdrop-blur-md shadow-lg py-3" : "bg-transparent py-5"
       }`}
     >
       <div className="container mx-auto px-4">
@@ -49,52 +61,45 @@ function Header() {
             {navItems.map((item) => (
               <NavLink key={item.path} href={item.path} label={item.label} isActive={pathname === item.path} />
             ))}
-
-            <ThemeToggle />
-
             <Button
               size="sm"
-              onClick={() => window.open("/contato", "_self")}
-              className="gradient-primary gradient-primary-hover text-white rounded-lg shadow-glow hover:shadow-glow-hover transition-all duration-300"
+              onClick={() => window.open("/start", "_self")}
+              className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white rounded-lg shadow-glow hover:shadow-glow-hover transition-all duration-300"
             >
-              Fale Comigo
+              Mude seu Negócio
             </Button>
           </nav>
 
           {/* Mobile Menu Button */}
-          <div className="flex items-center gap-2 md:hidden">
-            <ThemeToggle />
-
-            <button
-              className="relative z-50"
-              onClick={() => setIsOpen(!isOpen)}
-              aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
-            >
-              <AnimatePresence mode="wait">
-                {isOpen ? (
-                  <motion.div
-                    key="close"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <X className="h-6 w-6 text-indigo-900 dark:text-white" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="menu"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Menu className="h-6 w-6 text-indigo-900 dark:text-white" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </button>
-          </div>
+          <button
+            className="md:hidden relative z-50"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
+          >
+            <AnimatePresence mode="wait">
+              {isOpen ? (
+                <motion.div
+                  key="close"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <X className="h-6 w-6 text-white" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="menu"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Menu className="h-6 w-6 text-white" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </button>
 
           {/* Mobile Menu */}
           <AnimatePresence>
@@ -104,9 +109,9 @@ function Header() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="fixed inset-0 bg-white/95 dark:bg-black/95 backdrop-blur-md flex flex-col items-center justify-center z-40 md:hidden"
+                className="fixed top-0 left-0 right-0 bottom-0 h-screen bg-black/95 backdrop-blur-lg flex flex-col items-center justify-center z-40 md:hidden overflow-y-auto"
               >
-                <nav className="flex flex-col items-center space-y-8">
+                <nav className="flex flex-col items-center space-y-8 py-20">
                   {navItems.map((item, index) => (
                     <motion.div
                       key={item.path}
@@ -117,9 +122,7 @@ function Header() {
                       <Link
                         href={item.path}
                         className={`text-xl font-bold transition-colors duration-300 ${
-                          pathname === item.path
-                            ? "text-purple-700 dark:text-purple-400"
-                            : "text-indigo-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400"
+                          pathname === item.path ? "text-purple-500" : "text-white hover:text-purple-400"
                         }`}
                       >
                         {item.label}
@@ -133,10 +136,10 @@ function Header() {
                   >
                     <Button
                       size="lg"
-                      onClick={() => window.open("/contato", "_self")}
-                      className="gradient-primary gradient-primary-hover text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 mt-4"
+                      onClick={() => window.open("/start", "_self")}
+                      className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white rounded-lg shadow-glow hover:shadow-glow-hover transition-all duration-300 mt-4"
                     >
-                      Fale Comigo
+                      Mude seu Negócio
                     </Button>
                   </motion.div>
                 </nav>
@@ -150,6 +153,7 @@ function Header() {
 }
 
 // Componente de link de navegação com animação
+// Vamos substituir por uma implementação sem o layoutId para evitar o bug visual
 const NavLink = memo(
   ({
     href,
@@ -164,19 +168,15 @@ const NavLink = memo(
       <Link
         href={href}
         className={`relative font-medium text-sm transition-colors duration-300 ${
-          isActive
-            ? "text-purple-700 dark:text-purple-400"
-            : "text-indigo-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400"
+          isActive ? "text-purple-500" : "text-white hover:text-purple-400"
         }`}
       >
         {label}
-        {isActive && (
-          <motion.div
-            layoutId="activeNavIndicator"
-            className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-600 to-fuchsia-600 rounded-full"
-            transition={{ duration: 0.3 }}
-          />
-        )}
+        <div
+          className={`absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-500 to-fuchsia-500 rounded-full transition-all duration-300 ${
+            isActive ? "opacity-100 w-full" : "opacity-0 w-0"
+          }`}
+        />
       </Link>
     )
   },

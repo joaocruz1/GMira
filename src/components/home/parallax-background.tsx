@@ -1,20 +1,23 @@
 "use client"
 
 import { memo, useEffect, useState } from "react"
-import { motion, useTransform, type MotionValue } from "framer-motion"
+import { motion, useTransform, motionValue, type MotionValue } from "framer-motion"
 
 interface ParallaxBackgroundProps {
-  scrollYProgress: MotionValue<number>
+  scrollYProgress: MotionValue<number> | null
 }
 
 function ParallaxBackground({ scrollYProgress }: ParallaxBackgroundProps) {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isMounted, setIsMounted] = useState(false)
 
-  // Parallax transformations based on scroll
-  const backgroundY1 = useTransform(scrollYProgress, [0, 1], ["0%", "30%"])
-  const backgroundY2 = useTransform(scrollYProgress, [0, 1], ["0%", "20%"])
-  const backgroundY3 = useTransform(scrollYProgress, [0, 1], ["0%", "10%"])
+  // Criar um MotionValue estático se scrollYProgress for nulo
+  const safeScrollYProgress = scrollYProgress || motionValue(0)
+
+  // Usar o valor seguro para as transformações
+  const backgroundY1 = useTransform(safeScrollYProgress, [0, 1], ["0%", "30%"])
+  const backgroundY2 = useTransform(safeScrollYProgress, [0, 1], ["0%", "20%"])
+  const backgroundY3 = useTransform(safeScrollYProgress, [0, 1], ["0%", "10%"])
 
   // Handle mouse movement for additional parallax effect
   useEffect(() => {
@@ -57,12 +60,12 @@ function ParallaxBackground({ scrollYProgress }: ParallaxBackgroundProps) {
             x: mousePosition.x * -30,
           }}
         >
-          {/* Animated geometric shapes - reduced number for better performance */}
+          {/* Animated geometric shapes */}
           <motion.div
-            className="absolute top-[20%] left-[10%] w-64 h-64 rounded-full bg-purple-900/10 blur-3xl"
+            className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-purple-600/10 blur-3xl"
             animate={{
               scale: [1, 1.2, 1],
-              opacity: [0.3, 0.5, 0.3],
+              opacity: [0.2, 0.3, 0.2],
             }}
             transition={{
               duration: 8,
@@ -72,16 +75,30 @@ function ParallaxBackground({ scrollYProgress }: ParallaxBackgroundProps) {
           />
 
           <motion.div
-            className="absolute bottom-[20%] left-[30%] w-80 h-80 rounded-full bg-fuchsia-900/10 blur-3xl"
+            className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-fuchsia-600/10 blur-3xl"
             animate={{
               scale: [1, 1.4, 1],
-              opacity: [0.2, 0.3, 0.2],
+              opacity: [0.15, 0.25, 0.15],
             }}
             transition={{
               duration: 12,
               repeat: Number.POSITIVE_INFINITY,
               repeatType: "reverse",
               delay: 2,
+            }}
+          />
+
+          <motion.div
+            className="absolute top-2/3 right-1/3 w-72 h-72 rounded-full bg-blue-600/10 blur-3xl"
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.15, 0.3, 0.15],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Number.POSITIVE_INFINITY,
+              repeatType: "reverse",
+              delay: 1,
             }}
           />
         </motion.div>
@@ -102,8 +119,8 @@ function ParallaxBackground({ scrollYProgress }: ParallaxBackgroundProps) {
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
       </div>
 
-      {/* Overlay gradient for better text readability */}
-      <div className="fixed inset-0 z-0 pointer-events-none bg-gradient-to-b from-black/40 via-transparent to-black/70" />
+      {/* Overlay gradient for better text readability - muito mais leve */}
+      <div className="fixed inset-0 z-0 pointer-events-none bg-gradient-to-b from-black/10 via-transparent to-black/20" />
     </>
   )
 }

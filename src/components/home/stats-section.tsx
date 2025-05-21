@@ -1,171 +1,162 @@
 "use client"
 
-import { memo, useEffect, useRef, useState } from "react"
+import type React from "react"
+
+import { memo, useEffect, useState, useRef } from "react"
 import { motion, useInView } from "framer-motion"
-import { Card } from "@/components/ui/card"
-import { TrendingUp, Users, Award, Target } from "lucide-react"
 
 function StatsSection() {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const isInView = useInView(sectionRef, { once: true, margin: "-100px" })
+
   return (
-    <section className="py-24 md:py-32 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f9f8ff] to-white dark:from-black dark:via-purple-950/10 dark:to-black" />
+    <section ref={sectionRef} className="py-16 relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-950/5 to-black" />
 
-      {/* Background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-purple-50/80 dark:bg-purple-600/10 blur-3xl"
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-          }}
-        />
-
-        <motion.div
-          className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-indigo-50/80 dark:bg-fuchsia-600/10 blur-3xl"
-          animate={{
-            y: [0, 30, 0],
-            opacity: [0.2, 0.4, 0.2],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Number.POSITIVE_INFINITY,
-            repeatType: "reverse",
-            delay: 1,
-          }}
-        />
-      </div>
-
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-12 relative z-30"
         >
-          <h2 className="text-3xl md:text-5xl font-bold mb-6 text-indigo-950 dark:text-white">
-            RESULTADOS <span className="text-purple-700 dark:text-purple-500">COMPROVADOS</span>
-          </h2>
-          <p className="text-indigo-700 dark:text-gray-300 max-w-3xl mx-auto">
-            Números que demonstram a eficácia das nossas estratégias e o impacto que podemos gerar para o seu negócio.
-          </p>
+          <div className="bg-black/70 backdrop-blur-md py-6 rounded-xl inline-block px-10 shadow-xl">
+            <h2 className="text-3xl md:text-4xl font-bold text-white">
+              Impactos <span className="text-purple-400">Reais</span> Para seu Negócio
+            </h2>
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {stats.map((stat, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
+              className="bg-gradient-to-br from-purple-900/30 to-black/60 backdrop-blur-sm rounded-xl p-6 border border-purple-900/30 hover:border-purple-600/50 transition-all duration-300"
             >
-              <Card className="bg-white/95 dark:bg-black/60 backdrop-blur-md border border-purple-100/50 dark:border-purple-900/50 hover:border-purple-300/50 dark:hover:border-purple-600 transition-all p-8 rounded-xl overflow-hidden h-full hover:shadow-lg dark:hover:shadow-purple-900/20 text-center">
-                <div className="flex justify-center mb-6">
-                  <div className="bg-gradient-to-br from-purple-600 to-fuchsia-600 p-4 rounded-xl w-16 h-16 flex items-center justify-center shadow-md">
-                    {stat.icon}
-                  </div>
+              <div className="mb-4">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-fuchsia-600 text-white">
+                  {stat.icon}
                 </div>
+              </div>
 
-                <CountUpAnimation
-                  target={stat.value}
-                  prefix={stat.prefix}
-                  suffix={stat.suffix}
-                  className="text-4xl md:text-5xl font-bold text-indigo-950 dark:text-white mb-2"
-                />
+              <CountUp value={stat.value} suffix={stat.suffix} duration={2} startOnView={isInView}>
+                {({ displayValue }) => <h3 className="text-3xl md:text-4xl font-bold mb-2">{displayValue}</h3>}
+              </CountUp>
 
-                <h3 className="text-xl font-bold text-purple-700 dark:text-purple-400 mb-3">{stat.label}</h3>
-                <p className="text-indigo-700 dark:text-gray-300">{stat.description}</p>
-              </Card>
+              <p className="text-gray-400">{stat.label}</p>
             </motion.div>
           ))}
         </div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ duration: 1, delay: 0.5 }}
+          className="mt-12 text-center text-sm text-gray-500"
+        >
+          * Baseado em resultados médios de nossos clientes nos últimos 12 meses.
+        </motion.div>
       </div>
     </section>
   )
 }
 
-interface CountUpAnimationProps {
-  target: number
-  duration?: number
-  prefix?: string
+interface CountUpProps {
+  value: number
   suffix?: string
-  className?: string
+  duration?: number
+  startOnView: boolean
+  children: ({ displayValue }: { displayValue: string }) => React.ReactNode
 }
 
-function CountUpAnimation({ target, duration = 2, prefix = "", suffix = "", className = "" }: CountUpAnimationProps) {
-  const [count, setCount] = useState(0)
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
+const CountUp = memo(({ value, suffix = "", duration = 2, startOnView, children }: CountUpProps) => {
+  const [displayValue, setDisplayValue] = useState(0)
 
   useEffect(() => {
-    if (!isInView) return
+    if (!startOnView) return
 
-    let startTime: number
+    let startTime: number | null = null
     let animationFrame: number
 
-    const updateCount = (timestamp: number) => {
+    const updateValue = (timestamp: number) => {
       if (!startTime) startTime = timestamp
       const progress = Math.min((timestamp - startTime) / (duration * 1000), 1)
 
-      setCount(Math.floor(progress * target))
+      setDisplayValue(Math.floor(progress * value))
 
       if (progress < 1) {
-        animationFrame = requestAnimationFrame(updateCount)
+        animationFrame = requestAnimationFrame(updateValue)
       }
     }
 
-    animationFrame = requestAnimationFrame(updateCount)
+    animationFrame = requestAnimationFrame(updateValue)
 
     return () => cancelAnimationFrame(animationFrame)
-  }, [isInView, target, duration])
+  }, [startOnView, value, duration])
 
-  return (
-    <div ref={ref} className={className}>
-      {prefix}
-      {count}
-      {suffix}
-    </div>
-  )
-}
+  return children({ displayValue: `${displayValue}${suffix}` })
+})
+
+CountUp.displayName = "CountUp"
 
 const stats = [
   {
-    value: 150,
-    prefix: "+",
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+      </svg>
+    ),
+    value: 200,
     suffix: "%",
     label: "Aumento em Engajamento",
-    description: "Média de crescimento no engajamento das redes sociais dos nossos clientes.",
-    icon: <Users className="h-8 w-8 text-white" />,
   },
   {
-    value: 200,
-    prefix: "+",
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+    ),
+    value: 300,
     suffix: "%",
-    label: "ROI em Campanhas",
-    description: "Retorno médio sobre investimento nas campanhas de tráfego pago.",
-    icon: <TrendingUp className="h-8 w-8 text-white" />,
+    label: "ROI Médio",
   },
   {
-    value: 40,
-    prefix: "-",
-    suffix: "%",
-    label: "Redução de CAC",
-    description: "Redução média no custo de aquisição de clientes.",
-    icon: <Target className="h-8 w-8 text-white" />,
-  },
-  {
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        />
+      </svg>
+    ),
     value: 50,
-    prefix: "",
     suffix: "+",
-    label: "Projetos Concluídos",
-    description: "Clientes satisfeitos com resultados comprovados.",
-    icon: <Award className="h-8 w-8 text-white" />,
+    label: "Clientes Satisfeitos",
+  },
+  {
+    icon: (
+      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"
+        />
+      </svg>
+    ),
+    value: 150,
+    suffix: "%",
+    label: "Aumento em Conversões",
   },
 ]
 

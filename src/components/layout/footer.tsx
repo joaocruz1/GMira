@@ -22,7 +22,7 @@ function Footer() {
               viewport={{ once: true }}
             >
               <Image
-                src="/GMira.svg"
+                src="/img/logos/logoBlack.png"
                 alt="GMira Marketing Digital"
                 width={150}
                 height={50}
@@ -176,7 +176,6 @@ const quickLinks = [
   { href: "/servicos", label: "Serviços" },
   { href: "/sobre", label: "Sobre" },
   { href: "/portfolio", label: "Portfólio" },
-  { href: "/blog", label: "Blog" },
   { href: "/contato", label: "Contato" },
 ]
 

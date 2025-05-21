@@ -1,24 +1,49 @@
 "use client"
 
-import { useRef, Suspense, lazy } from "react"
+import { useRef } from "react"
 import { useScroll } from "framer-motion"
 import dynamic from "next/dynamic"
-import HeroSection from "@/components/home/hero-section"
+import { Suspense } from "react"
 import LoadingFallback from "@/components/loading-fallback"
 
-// Lazy load components that are not needed for initial render
-const ParallaxBackground = dynamic(() => import("@/components/about-page/parallax-background"), {
+// Lazy load components
+const ParallaxBackground = dynamic(() => import("@/components/home/parallax-background"), {
   ssr: false,
-  loading: () => <div className="fixed inset-0 bg-background"></div>,
+  loading: () => <div className="fixed inset-0 bg-black"></div>,
 })
 
-// Lazy load below-the-fold sections
-const ServicesSection = lazy(() => import("@/components/home/services-section"))
-const ProcessSection = lazy(() => import("@/components/home/process-section"))
-const StatsSection = lazy(() => import("@/components/home/stats-section"))
-const TestimonialsSection = lazy(() => import("@/components/home/testimonials-section"))
-const AboutSection = lazy(() => import("@/components/home/about-section"))
-const CtaSection = lazy(() => import("@/components/home/cta-section"))
+const HeroSection = dynamic(() => import("@/components/home/hero-section"), {
+  loading: () => <LoadingFallback />,
+})
+
+const StatsSection = dynamic(() => import("@/components/home/stats-section"), {
+  loading: () => <LoadingFallback />,
+})
+
+const FeaturesShowcase = dynamic(() => import("@/components/home/features-showcase"), {
+  loading: () => <LoadingFallback />,
+})
+
+const ServicesCarousel = dynamic(() => import("@/components/home/services-carousel"), {
+  loading: () => <LoadingFallback />,
+})
+
+const TestimonialsSlider = dynamic(() => import("@/components/home/testimonials-slider"), {
+  loading: () => <LoadingFallback />,
+})
+
+const CtaSection = dynamic(() => import("@/components/home/cta-section"), {
+  loading: () => <LoadingFallback />,
+})
+
+const ProcessSection = dynamic(() => import("@/components/home/process-section"), {
+  loading: () => <LoadingFallback />,
+})
+
+const PortfolioPreview = dynamic(() => import("@/components/home/portfolio-preview"), {
+  loading: () => <LoadingFallback />,
+})
+
 
 export default function Home() {
   const containerRef = useRef(null)
@@ -27,33 +52,27 @@ export default function Home() {
     offset: ["start start", "end end"],
   })
 
-  // Função para lidar com o clique no botão CTA
-  const handleCtaClick = () => {
-    const phoneNumber = "553599574977"
-    const defaultMessage = "Olá, gostaria de mais informações!"
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(defaultMessage)}`
-
-    window.open(whatsappUrl, "_blank")
-  }
-
   return (
-    <div ref={containerRef} className="min-h-screen overflow-hidden">
-      {/* Parallax Background - apenas para seções abaixo do hero */}
-      <div className="relative z-0 mt-screen">
+    <>
+      <div ref={containerRef} className="min-h-screen bg-black text-white overflow-hidden">
+        {/* Parallax Background */}
         <ParallaxBackground scrollYProgress={scrollYProgress} />
-      </div>
 
-      <div className="relative z-10">
-        <HeroSection onCtaClick={handleCtaClick} />
-        <Suspense fallback={<LoadingFallback />}>
-          <ServicesSection />
-          <ProcessSection />
-          <StatsSection />
-          <TestimonialsSection />
-          <AboutSection />
-          <CtaSection onCtaClick={handleCtaClick} />
-        </Suspense>
+        <div className="relative z-20">
+          <Suspense fallback={<LoadingFallback />}>
+            <HeroSection />
+            <div className="relative z-20">
+              <StatsSection />
+              <ProcessSection />
+              <FeaturesShowcase />
+              <ServicesCarousel />
+              <PortfolioPreview />
+              <TestimonialsSlider />
+              <CtaSection />
+            </div>
+          </Suspense>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

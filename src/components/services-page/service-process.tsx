@@ -1,32 +1,27 @@
 "use client"
 
-import { memo, useRef } from "react"
-import { motion, useInView } from "framer-motion"
-import { Check } from "lucide-react"
+import { memo } from "react"
+import { motion } from "framer-motion"
 
-function ProcessSection() {
-  const sectionRef = useRef<HTMLDivElement>(null)
-  const isInView = useInView(sectionRef, { once: true, margin: "-100px" })
-
+function ServiceProcess() {
   return (
-    <section ref={sectionRef} className="py-20 relative">
+    <section className="py-20 relative">
       <div className="absolute inset-0 bg-gradient-to-b from-black via-purple-950/5 to-black" />
 
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16 relative z-30"
+          viewport={{ once: true }}
+          className="text-center mb-16"
         >
-          <div className="bg-black/70 backdrop-blur-md py-6 rounded-xl inline-block px-10 shadow-xl">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white">
-              Como <span className="text-purple-400">Trabalhamos</span>
-            </h2>
-            <p className="text-gray-200 max-w-3xl mx-auto">
-              Nossa metodologia é estruturada para garantir resultados consistentes e mensuráveis para o seu negócio.
-            </p>
-          </div>
+          <h2 className="text-3xl md:text-5xl font-bold mb-6">
+            COMO <span className="text-purple-500">TRABALHAMOS</span>
+          </h2>
+          <p className="text-gray-300 max-w-3xl mx-auto">
+            Nossa metodologia é estruturada para garantir resultados consistentes e mensuráveis para o seu negócio.
+          </p>
         </motion.div>
 
         <div className="relative">
@@ -38,8 +33,9 @@ function ProcessSection() {
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 50 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.1 }}
+                viewport={{ once: true, margin: "-100px" }}
                 className={`flex flex-col ${
                   index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
                 } items-center gap-8`}
@@ -64,13 +60,11 @@ function ProcessSection() {
                       <motion.li
                         key={idx}
                         initial={{ opacity: 0, x: index % 2 === 0 ? 20 : -20 }}
-                        animate={isInView ? { opacity: 1, x: 0 } : {}}
+                        whileInView={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.5, delay: 0.3 + idx * 0.1 }}
-                        className="bg-purple-900/20 backdrop-blur-sm p-4 rounded-lg border border-purple-900/50 flex items-start gap-3"
+                        viewport={{ once: true }}
+                        className="bg-purple-900/20 backdrop-blur-sm p-4 rounded-lg border border-purple-900/50"
                       >
-                        <div className="bg-purple-500/20 p-1 rounded-full mt-1 flex-shrink-0">
-                          <Check className="h-4 w-4 text-purple-400" />
-                        </div>
                         <p className="text-gray-200">{detail}</p>
                       </motion.li>
                     ))}
@@ -128,4 +122,4 @@ const processSteps = [
   },
 ]
 
-export default memo(ProcessSection)
+export default memo(ServiceProcess)

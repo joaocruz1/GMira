@@ -2,6 +2,8 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter, Montserrat } from "next/font/google"
 import "./globals.css"
+import Header from "@/components/layout/header"
+import Footer from "@/components/layout/footer"
 
 // Fonte principal para títulos - com subset otimizado
 const montserrat = Montserrat({
@@ -24,7 +26,6 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "GMira Marketing Digital - Sua marca no alvo certo!",
   description: "Estratégia, conteúdo e tráfego pago para negócios que querem crescer no digital",
-
   openGraph: {
     title: "GMira Marketing Digital - Sua marca no alvo certo!",
     description: "Estratégia, conteúdo e tráfego pago para negócios que querem crescer no digital",
@@ -48,7 +49,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={`${montserrat.variable} ${inter.variable}`}>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Header />
+        <main className="min-h-screen bg-black text-white overflow-hidden">{children}</main>
+        <Footer />
+      </body>
     </html>
   )
 }
