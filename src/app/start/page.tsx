@@ -2,10 +2,10 @@
 
 import type React from "react"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { ChevronRight, ChevronLeft, ArrowRight, Check } from "lucide-react"
+import { ChevronRight, ChevronLeft, ArrowRight, Check, Star, Zap, Crown } from "lucide-react"
 import Link from "next/link"
 import Header from "@/components/layout/header"
 import dynamic from "next/dynamic"
@@ -16,17 +16,32 @@ const ParallaxBackground = dynamic(() => import("@/components/home/parallax-back
   loading: () => <div className="fixed inset-0 bg-black"></div>,
 })
 
+interface ServiceSelection {
+  serviceId: string
+  plan: "basic" | "medium" | "premium" | null
+}
+
 export default function StartPage() {
   const [step, setStep] = useState(1)
   const [selectedBusiness, setSelectedBusiness] = useState<string | null>(null)
   const [selectedGoals, setSelectedGoals] = useState<string[]>([])
-  const [selectedServices, setSelectedServices] = useState<string[]>([])
+  const [selectedServices, setSelectedServices] = useState<ServiceSelection[]>([])
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
   })
   const containerRef = useRef(null)
+
+  // Calcular valor total do orçamento
+  const totalBudget = useMemo(() => {
+    return selectedServices.reduce((total, service) => {
+      if (!service.plan) return total
+      const serviceData = marketingServices.find((s) => s.id === service.serviceId)
+      if (!serviceData) return total
+      return total + serviceData.pricing[service.plan]
+    }, 0)
+  }, [selectedServices])
 
   const handleBusinessSelect = (business: string) => {
     setSelectedBusiness(business)
@@ -40,12 +55,32 @@ export default function StartPage() {
     }
   }
 
-  const handleServiceToggle = (service: string) => {
-    if (selectedServices.includes(service)) {
-      setSelectedServices(selectedServices.filter((s) => s !== service))
-    } else {
-      setSelectedServices([...selectedServices, service])
-    }
+  const handleServicePlanSelect = (serviceId: string, plan: "basic" | "medium" | "premium" | null) => {
+    setSelectedServices((prev) => {
+      const existingIndex = prev.findIndex((s) => s.serviceId === serviceId)
+
+      if (existingIndex >= 0) {
+        // Atualizar serviço existente
+        const updated = [...prev]
+        if (plan === null) {
+          // Remover serviço se plan for null
+          updated.splice(existingIndex, 1)
+        } else {
+          updated[existingIndex] = { serviceId, plan }
+        }
+        return updated
+      } else if (plan !== null) {
+        // Adicionar novo serviço
+        return [...prev, { serviceId, plan }]
+      }
+
+      return prev
+    })
+  }
+
+  const getSelectedPlan = (serviceId: string): "basic" | "medium" | "premium" | null => {
+    const service = selectedServices.find((s) => s.serviceId === serviceId)
+    return service?.plan || null
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,7 +113,7 @@ export default function StartPage() {
 
   return (
     <div ref={containerRef} className="min-h-screen bg-black text-white overflow-hidden">
-      {/* Parallax Background - passando null para indicar que não queremos efeito de scroll */}
+      {/* Parallax Background */}
       <ParallaxBackground scrollYProgress={null} />
 
       <Header />
@@ -125,6 +160,28 @@ export default function StartPage() {
               ))}
             </div>
           </div>
+
+          {/* Budget Display - Mostrar apenas no step 3 */}
+          {step === 3 && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="fixed top-24 right-4 bg-gradient-to-br from-purple-900/90 to-black/90 backdrop-blur-md rounded-xl p-4 border border-purple-500/50 z-50 shadow-xl"
+            >
+              <div className="text-center">
+                <p className="text-sm text-gray-300 mb-1">Orçamento Total</p>
+                <motion.p
+                  key={totalBudget}
+                  initial={{ scale: 1.2 }}
+                  animate={{ scale: 1 }}
+                  className="text-2xl font-bold text-purple-400"
+                >
+                  R$ {totalBudget.toLocaleString("pt-BR")}
+                </motion.p>
+                <p className="text-xs text-gray-400">por mês</p>
+              </div>
+            </motion.div>
+          )}
 
           <div className="max-w-4xl mx-auto">
             <AnimatePresence mode="wait">
@@ -211,38 +268,161 @@ export default function StartPage() {
 
               {step === 3 && (
                 <StepContent key="step3">
-                  <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">Quais serviços você precisa?</h2>
-                  <p className="text-gray-300 text-center mb-10">Selecione todos que se aplicam</p>
+                  <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">Escolha seus serviços e planos</h2>
+                  <p className="text-gray-300 text-center mb-10">Selecione o plano ideal para cada serviço</p>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-8">
                     {marketingServices.map((service, index) => (
                       <motion.div
                         key={service.id}
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: index * 0.1 }}
-                        onClick={() => handleServiceToggle(service.id)}
-                        className={`bg-gradient-to-br ${
-                          selectedServices.includes(service.id)
-                            ? "from-purple-900/50 to-fuchsia-900/30 border-purple-500"
-                            : "from-purple-900/20 to-black/60 border-purple-900/30 hover:border-purple-600/50"
-                        } backdrop-blur-sm rounded-xl p-6 border transition-all duration-300 cursor-pointer`}
+                        className="bg-gradient-to-br from-purple-900/20 to-black/60 backdrop-blur-sm rounded-xl p-6 border border-purple-900/30"
                       >
-                        <div className="flex items-center gap-4">
-                          <div
-                            className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${
-                              selectedServices.includes(service.id)
-                                ? "bg-gradient-to-r from-purple-600 to-fuchsia-600"
-                                : "bg-purple-900/50"
-                            } transition-colors duration-300`}
-                          >
-                            {service.icon}
+                        <div className="mb-6">
+                          <div className="flex items-center gap-4 mb-4">
+                            <div className="bg-purple-900/50 p-3 rounded-lg">{service.icon}</div>
+                            <div>
+                              <h3 className="text-xl font-bold">{service.title}</h3>
+                              <p className="text-gray-400 text-sm">{service.description}</p>
+                            </div>
                           </div>
+                        </div>
 
-                          <div>
-                            <h3 className="text-lg font-bold">{service.title}</h3>
-                            <p className="text-gray-400 text-sm">{service.description}</p>
-                          </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {/* Plano Básico */}
+                          <motion.div
+                            whileHover={{ y: -5 }}
+                            onClick={() => {
+                              const currentPlan = getSelectedPlan(service.id)
+                              handleServicePlanSelect(service.id, currentPlan === "basic" ? null : "basic")
+                            }}
+                            className={`p-4 rounded-lg border cursor-pointer transition-all duration-300 ${
+                              getSelectedPlan(service.id) === "basic"
+                                ? "border-purple-500 bg-purple-900/30"
+                                : "border-gray-700 hover:border-purple-600/50 bg-gray-900/30"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <Star className="h-5 w-5 text-purple-400" />
+                                <h4 className="font-bold">Básico</h4>
+                              </div>
+                              {getSelectedPlan(service.id) === "basic" && <Check className="h-5 w-5 text-green-500" />}
+                            </div>
+                            <p className="text-2xl font-bold text-purple-400 mb-2">
+                              R$ {service.pricing.basic.toLocaleString("pt-BR")}
+                            </p>
+                            <p className="text-xs text-gray-400 mb-3">por mês</p>
+                            <ul className="space-y-1">
+                              {service.features.basic.map((feature, idx) => (
+                                <li key={idx} className="text-xs text-gray-300 flex items-start">
+                                  <div className="mr-1 mt-1 text-purple-400">
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clipRule="evenodd"
+                                      />
+                                    </svg>
+                                  </div>
+                                  {feature}
+                                </li>
+                              ))}
+                            </ul>
+                          </motion.div>
+
+                          {/* Plano Médio */}
+                          <motion.div
+                            whileHover={{ y: -5 }}
+                            onClick={() => {
+                              const currentPlan = getSelectedPlan(service.id)
+                              handleServicePlanSelect(service.id, currentPlan === "medium" ? null : "medium")
+                            }}
+                            className={`p-4 rounded-lg border cursor-pointer transition-all duration-300 relative ${
+                              getSelectedPlan(service.id) === "medium"
+                                ? "border-purple-500 bg-purple-900/30"
+                                : "border-gray-700 hover:border-purple-600/50 bg-gray-900/30"
+                            }`}
+                          >
+                            <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                              <span className="bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white text-xs px-3 py-1 rounded-full">
+                                Mais Popular
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <Zap className="h-5 w-5 text-purple-400" />
+                                <h4 className="font-bold">Médio</h4>
+                              </div>
+                              {getSelectedPlan(service.id) === "medium" && <Check className="h-5 w-5 text-green-500" />}
+                            </div>
+                            <p className="text-2xl font-bold text-purple-400 mb-2">
+                              R$ {service.pricing.medium.toLocaleString("pt-BR")}
+                            </p>
+                            <p className="text-xs text-gray-400 mb-3">por mês</p>
+                            <ul className="space-y-1">
+                              {service.features.medium.map((feature, idx) => (
+                                <li key={idx} className="text-xs text-gray-300 flex items-start">
+                                  <div className="mr-1 mt-1 text-purple-400">
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clipRule="evenodd"
+                                      />
+                                    </svg>
+                                  </div>
+                                  {feature}
+                                </li>
+                              ))}
+                            </ul>
+                          </motion.div>
+
+                          {/* Plano Premium */}
+                          <motion.div
+                            whileHover={{ y: -5 }}
+                            onClick={() => {
+                              const currentPlan = getSelectedPlan(service.id)
+                              handleServicePlanSelect(service.id, currentPlan === "premium" ? null : "premium")
+                            }}
+                            className={`p-4 rounded-lg border cursor-pointer transition-all duration-300 ${
+                              getSelectedPlan(service.id) === "premium"
+                                ? "border-purple-500 bg-purple-900/30"
+                                : "border-gray-700 hover:border-purple-600/50 bg-gray-900/30"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <Crown className="h-5 w-5 text-purple-400" />
+                                <h4 className="font-bold">Fantástico</h4>
+                              </div>
+                              {getSelectedPlan(service.id) === "premium" && (
+                                <Check className="h-5 w-5 text-green-500" />
+                              )}
+                            </div>
+                            <p className="text-2xl font-bold text-purple-400 mb-2">
+                              R$ {service.pricing.premium.toLocaleString("pt-BR")}
+                            </p>
+                            <p className="text-xs text-gray-400 mb-3">por mês</p>
+                            <ul className="space-y-1">
+                              {service.features.premium.map((feature, idx) => (
+                                <li key={idx} className="text-xs text-gray-300 flex items-start">
+                                  <div className="mr-1 mt-1 text-purple-400">
+                                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clipRule="evenodd"
+                                      />
+                                    </svg>
+                                  </div>
+                                  {feature}
+                                </li>
+                              ))}
+                            </ul>
+                          </motion.div>
                         </div>
                       </motion.div>
                     ))}
@@ -306,6 +486,39 @@ export default function StartPage() {
                         />
                       </div>
                     </div>
+
+                    {/* Resumo do orçamento */}
+                    <div className="mt-8 p-6 bg-gradient-to-br from-purple-900/40 to-black/60 rounded-lg border border-purple-500/30">
+                      <h3 className="text-lg font-bold mb-4">Resumo do Orçamento</h3>
+                      <div className="space-y-2">
+                        {selectedServices.map((service) => {
+                          const serviceData = marketingServices.find((s) => s.id === service.serviceId)
+                          if (!serviceData || !service.plan) return null
+
+                          const planName =
+                            service.plan === "basic" ? "Básico" : service.plan === "medium" ? "Médio" : "Fantástico"
+
+                          return (
+                            <div key={service.serviceId} className="flex justify-between items-center">
+                              <span className="text-gray-300">
+                                {serviceData.title} - {planName}
+                              </span>
+                              <span className="font-bold text-purple-400">
+                                R$ {serviceData.pricing[service.plan].toLocaleString("pt-BR")}
+                              </span>
+                            </div>
+                          )
+                        })}
+                        <div className="border-t border-purple-500/30 pt-2 mt-4">
+                          <div className="flex justify-between items-center">
+                            <span className="text-lg font-bold">Total Mensal:</span>
+                            <span className="text-2xl font-bold text-purple-400">
+                              R$ {totalBudget.toLocaleString("pt-BR")}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </StepContent>
               )}
@@ -350,12 +563,39 @@ export default function StartPage() {
                       </div>
 
                       <div>
-                        <p className="text-sm text-gray-400">Serviços:</p>
-                        <ul className="list-disc pl-5 space-y-1">
-                          {selectedServices.map((serviceId) => (
-                            <li key={serviceId}>{marketingServices.find((s) => s.id === serviceId)?.title || ""}</li>
-                          ))}
+                        <p className="text-sm text-gray-400">Serviços Selecionados:</p>
+                        <ul className="space-y-2">
+                          {selectedServices.map((service) => {
+                            const serviceData = marketingServices.find((s) => s.id === service.serviceId)
+                            if (!serviceData || !service.plan) return null
+
+                            const planName =
+                              service.plan === "basic" ? "Básico" : service.plan === "medium" ? "Médio" : "Fantástico"
+
+                            return (
+                              <li
+                                key={service.serviceId}
+                                className="flex justify-between items-center bg-purple-900/20 p-3 rounded-lg"
+                              >
+                                <span>
+                                  {serviceData.title} - {planName}
+                                </span>
+                                <span className="font-bold text-purple-400">
+                                  R$ {serviceData.pricing[service.plan].toLocaleString("pt-BR")}/mês
+                                </span>
+                              </li>
+                            )
+                          })}
                         </ul>
+                      </div>
+
+                      <div className="border-t border-purple-500/30 pt-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-lg font-bold">Orçamento Total Mensal:</span>
+                          <span className="text-2xl font-bold text-purple-400">
+                            R$ {totalBudget.toLocaleString("pt-BR")}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -625,6 +865,31 @@ const marketingServices = [
         />
       </svg>
     ),
+    pricing: {
+      basic: 997,
+      medium: 1497,
+      premium: 2497,
+    },
+    features: {
+      basic: ["2 redes sociais", "12 posts mensais", "4 stories por semana", "Relatório mensal", "Suporte por email"],
+      medium: [
+        "3 redes sociais",
+        "20 posts mensais",
+        "8 stories por semana",
+        "2 reels por mês",
+        "Relatório quinzenal",
+        "Suporte prioritário",
+      ],
+      premium: [
+        "4 redes sociais",
+        "30 posts mensais",
+        "12 stories por semana",
+        "4 reels por mês",
+        "Estratégia personalizada",
+        "Relatório semanal",
+        "Suporte VIP",
+      ],
+    },
   },
   {
     id: "paid-ads",
@@ -646,6 +911,36 @@ const marketingServices = [
         />
       </svg>
     ),
+    pricing: {
+      basic: 1497,
+      medium: 2497,
+      premium: 3997,
+    },
+    features: {
+      basic: [
+        "1 plataforma (Meta ou Google)",
+        "Até R$ 3.000 em mídia",
+        "2 campanhas ativas",
+        "Relatório mensal",
+        "Otimização básica",
+      ],
+      medium: [
+        "2 plataformas",
+        "Até R$ 8.000 em mídia",
+        "4 campanhas ativas",
+        "Relatório quinzenal",
+        "Testes A/B",
+        "Otimização avançada",
+      ],
+      premium: [
+        "Múltiplas plataformas",
+        "Mídia ilimitada",
+        "Campanhas ilimitadas",
+        "Relatório semanal",
+        "Estratégia completa",
+        "Consultoria dedicada",
+      ],
+    },
   },
   {
     id: "content",
@@ -661,6 +956,28 @@ const marketingServices = [
         />
       </svg>
     ),
+    pricing: {
+      basic: 797,
+      medium: 1297,
+      premium: 1997,
+    },
+    features: {
+      basic: ["8 posts de conteúdo", "Copywriting básico", "Banco de imagens", "1 revisão por post"],
+      medium: [
+        "15 posts de conteúdo",
+        "Copywriting avançado",
+        "2 vídeos simples",
+        "Banco de imagens premium",
+        "2 revisões por post",
+      ],
+      premium: [
+        "25 posts de conteúdo",
+        "Copywriting especializado",
+        "4 vídeos profissionais",
+        "Fotografia personalizada",
+        "Revisões ilimitadas",
+      ],
+    },
   },
   {
     id: "design",
@@ -676,65 +993,28 @@ const marketingServices = [
         />
       </svg>
     ),
-  },
-  {
-    id: "email",
-    title: "Email Marketing",
-    description: "Estratégias de comunicação por email e automação",
-    icon: (
-      <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-        />
-      </svg>
-    ),
-  },
-  {
-    id: "seo",
-    title: "SEO",
-    description: "Otimização para mecanismos de busca",
-    icon: (
-      <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
-    ),
-  },
-  {
-    id: "website",
-    title: "Criação de Site/Landing Page",
-    description: "Desenvolvimento de sites e páginas de conversão",
-    icon: (
-      <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-        />
-      </svg>
-    ),
-  },
-  {
-    id: "strategy",
-    title: "Consultoria Estratégica",
-    description: "Planejamento e direcionamento para marketing digital",
-    icon: (
-      <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-        />
-      </svg>
-    ),
+    pricing: {
+      basic: 597,
+      medium: 997,
+      premium: 1497,
+    },
+    features: {
+      basic: ["Logo simples", "Cartão de visita", "2 templates para redes", "1 revisão"],
+      medium: [
+        "Identidade visual completa",
+        "Papelaria comercial",
+        "5 templates para redes",
+        "Material promocional",
+        "3 revisões",
+      ],
+      premium: [
+        "Branding completo",
+        "Manual da marca",
+        "Templates ilimitados",
+        "Materiais impressos",
+        "Apresentações",
+        "Revisões ilimitadas",
+      ],
+    },
   },
 ]
