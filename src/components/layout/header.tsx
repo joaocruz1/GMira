@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, memo } from "react"
+import { useState, useEffect, memo, useCallback, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
@@ -13,15 +13,24 @@ function Header() {
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
 
+  // Memoizar handlers para evitar re-renders desnecessários
+  const handleScroll = useCallback(() => {
+    setScrolled(window.scrollY > 20)
+  }, [])
+
+  const toggleMenu = useCallback(() => {
+    setIsOpen(prev => !prev)
+  }, [])
+
+  const handleStartClick = useCallback(() => {
+    window.open("/start", "_self")
+  }, [])
+
   // Detectar scroll para mudar o estilo do header
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
-    }
-
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  }, [handleScroll])
 
   // Fechar menu ao mudar de página
   useEffect(() => {
@@ -41,12 +50,20 @@ function Header() {
     }
   }, [isOpen])
 
+  // Memoizar classes CSS para evitar recálculos
+  const headerClasses = useMemo(() => 
+    `fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      scrolled ? "bg-black/80 backdrop-blur-md shadow-lg py-3" : "bg-transparent py-5"
+    }`, [scrolled]
+  )
+
+  // Não renderizar o header na página raiz (landingpage)
+  if (pathname === "/") {
+    return null
+  }
+
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-black/80 backdrop-blur-md shadow-lg py-3" : "bg-transparent py-5"
-      }`}
-    >
+    <header className={headerClasses}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -63,7 +80,7 @@ function Header() {
             ))}
             <Button
               size="sm"
-              onClick={() => window.open("/start", "_self")}
+              onClick={handleStartClick}
               className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white rounded-lg shadow-glow hover:shadow-glow-hover transition-all duration-300"
             >
               Mude seu Negócio
@@ -73,7 +90,7 @@ function Header() {
           {/* Mobile Menu Button */}
           <button
             className="md:hidden relative z-50"
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={toggleMenu}
             aria-label={isOpen ? "Fechar menu" : "Abrir menu"}
           >
             <AnimatePresence mode="wait">
@@ -136,7 +153,7 @@ function Header() {
                   >
                     <Button
                       size="lg"
-                      onClick={() => window.open("/start", "_self")}
+                      onClick={handleStartClick}
                       className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white rounded-lg shadow-glow hover:shadow-glow-hover transition-all duration-300 mt-4"
                     >
                       Mude seu Negócio
@@ -189,7 +206,6 @@ const navItems = [
   { path: "/servicos", label: "Serviços" },
   { path: "/sobre", label: "Sobre" },
   { path: "/portfolio", label: "Portfólio" },
-  { path: "/blog", label: "Blog" },
 ]
 
 export default memo(Header)

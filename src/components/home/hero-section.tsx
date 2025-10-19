@@ -1,6 +1,6 @@
 "use client"
 
-import { memo, useRef, useEffect } from "react"
+import { memo, useRef, useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
@@ -9,6 +9,63 @@ import Link from "next/link"
 
 function HeroSection() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false)
+
+  // Configurar vídeo de fundo
+  useEffect(() => {
+    const video = videoRef.current
+    if (video) {
+      // Configurações do vídeo para melhor performance
+      video.muted = true
+      video.loop = true
+      video.playsInline = true
+      
+      const handleLoadedData = () => {
+        setIsVideoLoaded(true)
+        // Tentar reproduzir o vídeo após carregar
+        const playPromise = video.play()
+        if (playPromise !== undefined) {
+          playPromise.catch((error) => {
+            console.log("Autoplay bloqueado, aguardando interação do usuário:", error)
+            // Adicionar listener para primeira interação do usuário
+            const handleUserInteraction = () => {
+              video.play().catch(console.error)
+              document.removeEventListener('click', handleUserInteraction)
+              document.removeEventListener('touchstart', handleUserInteraction)
+              document.removeEventListener('keydown', handleUserInteraction)
+            }
+            document.addEventListener('click', handleUserInteraction, { once: true })
+            document.addEventListener('touchstart', handleUserInteraction, { once: true })
+            document.addEventListener('keydown', handleUserInteraction, { once: true })
+          })
+        }
+      }
+
+      const handleCanPlay = () => {
+        setIsVideoLoaded(true)
+      }
+
+      const handleError = (error: Event) => {
+        console.warn("Erro ao carregar vídeo:", error)
+        setIsVideoLoaded(false)
+      }
+
+      // Adicionar listeners
+      video.addEventListener('loadeddata', handleLoadedData)
+      video.addEventListener('canplay', handleCanPlay)
+      video.addEventListener('error', handleError)
+      
+      // Forçar carregamento do vídeo
+      video.load()
+      
+      return () => {
+        video.removeEventListener('loadeddata', handleLoadedData)
+        video.removeEventListener('canplay', handleCanPlay)
+        video.removeEventListener('error', handleError)
+      }
+    }
+  }, [])
 
   // Interactive particle effect for hero section
   useEffect(() => {
@@ -144,21 +201,49 @@ function HeroSection() {
 
   return (
     <section className="relative min-h-screen flex items-center z-10 overflow-hidden">
-      {/* Interactive background canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 z-0" />
+      {/* Video Background */}
+      <div className="absolute inset-0 z-0">
+        <video
+          ref={videoRef}
+          className="w-full h-full object-cover scale-105"
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          onContextMenu={(e) => e.preventDefault()}
+          style={{
+            objectFit: 'cover',
+            pointerEvents: 'none'
+          }}
+        >
+          <source src="/VIDEOALVO.mp4" type="video/mp4" />
+          Seu navegador não suporta vídeos HTML5.
+        </video>
+        
+        {/* Fallback background caso vídeo não carregue */}
+        {!isVideoLoaded && (
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(138,43,226,0.2),transparent_70%)]" />
+        )}
+        
+        {/* Overlay escuro para melhor contraste do texto */}
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
 
-      <div className="container mx-auto px-4 py-20 md:py-32 z-10 relative">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      {/* Interactive background canvas */}
+      <canvas ref={canvasRef} className="absolute inset-0 z-[1]" />
+
+      <div className="container mx-auto px-4 py-20 md:py-32 z-20 relative">
+        <div className="flex justify-center lg:justify-start">
           <motion.div
-            className="space-y-8 text-center lg:text-left"
+            className="space-y-8 text-center lg:text-left max-w-4xl"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
-              Marketing Digital
+              SUA MARCA
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-purple-600 mt-2">
-                Com Resultados Reais
+                NO ALVO CERTO!
               </span>
             </h1>
 
@@ -173,7 +258,7 @@ function HeroSection() {
             </motion.p>
 
             <motion.div
-              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+              className="flex justify-center lg:justify-start"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.8 }}
@@ -188,104 +273,6 @@ function HeroSection() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-
-              <Link href="/portfolio">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-purple-500/30 text-white hover:bg-purple-900/20 px-8 py-6 rounded-xl"
-                >
-                  <span className="text-lg font-medium">Ver Portfólio</span>
-                </Button>
-              </Link>
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="relative"
-          >
-            <div className="relative h-[500px] w-full">
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-fuchsia-600/20 rounded-2xl blur-3xl"
-                animate={{
-                  scale: [1, 1.05, 1],
-                  opacity: [0.5, 0.7, 0.5],
-                }}
-                transition={{
-                  duration: 5,
-                  repeat: Number.POSITIVE_INFINITY,
-                  repeatType: "reverse",
-                }}
-              />
-
-              <div className="relative h-full w-full flex items-center justify-center">
-                <motion.div
-                  animate={{
-                    y: [0, -10, 0],
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Number.POSITIVE_INFINITY,
-                    repeatType: "reverse",
-                  }}
-                  className="relative w-4/5"
-                >
-                  <Image
-                    src="/marketing-hero.svg"
-                    alt="Marketing Digital"
-                    width={600}
-                    height={600}
-                    className="w-full h-auto"
-                    priority
-                  />
-                </motion.div>
-              </div>
-            </div>
-
-            <motion.div
-              className="absolute -bottom-8 -right-8 bg-gradient-to-br from-purple-600 to-fuchsia-600 rounded-2xl p-4 shadow-xl"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8, duration: 0.5 }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="bg-white rounded-full p-2">
-                  <svg className="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="text-white">
-                  <p className="font-bold">+150%</p>
-                  <p className="text-xs opacity-80">Aumento Médio em Conversões</p>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="absolute -top-4 -left-4 bg-gradient-to-br from-fuchsia-600 to-purple-600 rounded-2xl p-4 shadow-xl"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1, duration: 0.5 }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="bg-white rounded-full p-2">
-                  <svg className="w-8 h-8 text-fuchsia-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
-                    <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
-                  </svg>
-                </div>
-                <div className="text-white">
-                  <p className="font-bold">ROI 300%</p>
-                  <p className="text-xs opacity-80">Retorno sobre Investimento</p>
-                </div>
-              </div>
             </motion.div>
           </motion.div>
         </div>

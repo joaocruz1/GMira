@@ -10,7 +10,7 @@ function Footer() {
       <div className="container mx-auto px-4 text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
           <Image
-            src="/6.png"
+            src="/img/logos/logoWhite.png"
             alt="GMira Marketing Digital"
             width={100}
             height={30}

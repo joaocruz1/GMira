@@ -1,11 +1,16 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, Suspense, lazy } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Check, ChevronRight } from "lucide-react"
-import SocialLink from "@/components/links-page/social-link"
+import dynamic from "next/dynamic"
 import { optimizeResourceLoading } from "@/lib/utils"
+
+// Lazy load do componente SocialLink
+const SocialLink = dynamic(() => import("@/components/links-page/social-link"), {
+  loading: () => <div className="w-16 h-16 bg-gray-800 rounded-lg animate-pulse"></div>,
+})
 
 export default function LinksPage() {
   const containerRef = useRef(null)
@@ -67,15 +72,23 @@ export default function LinksPage() {
         <p className="text-purple-300 mb-8">Conheça nossas redes sociais.</p>
 
         {/* Grid de redes sociais */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-16 w-full max-w-3xl">
-          <SocialLink type="instagram" username="@gmiramarketing" href="https://www.instagram.com/gustavomira.mkt/" />
+        <Suspense fallback={
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-16 w-full max-w-3xl">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="w-16 h-16 bg-gray-800 rounded-lg animate-pulse"></div>
+            ))}
+          </div>
+        }>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-16 w-full max-w-3xl">
+            <SocialLink type="instagram" username="@gmiramarketing" href="https://www.instagram.com/gustavomira.mkt/" />
 
-          <SocialLink type="whatsapp" username="WhatsApp" href="https://wa.me/553599574977" />
+            <SocialLink type="whatsapp" username="WhatsApp" href="https://wa.me/553599574977" />
 
-          <SocialLink type="linkedin" username="GMira Studio" href="https://linkedin.com/in/gmira" />
+            <SocialLink type="linkedin" username="GMira Studio" href="https://linkedin.com/in/gmira" />
 
-          <SocialLink type="behance" username="@gmiradesign" href="https://behance.net/gmiradesign" />
-        </div>
+            <SocialLink type="behance" username="@gmiradesign" href="https://behance.net/gmiradesign" />
+          </div>
+        </Suspense>
 
         {/* Footer */}
         <footer className="text-center text-gray-500 text-sm mt-4">

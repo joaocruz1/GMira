@@ -37,6 +37,7 @@ function ParallaxBackground({ scrollYProgress }: ParallaxBackgroundProps) {
     return () => window.removeEventListener("mousemove", handleMouseMove)
   }, [])
 
+
   if (!isMounted) return null
 
   return (
