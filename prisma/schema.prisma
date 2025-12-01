@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Configuração do seed
+// Execute: npm run prisma:seed
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  MASCULINO
+  FEMININO
+  OUTRO
+}
+
+enum InfluencerStatus {
+  PENDING
+  PUBLISHED
+  REJECTED
+}
+
+model Influencer {
+  id             String            @id @default(uuid())
+  name           String
+  photo          String?           // URL da foto do perfil
+  email          String?
+  phone          String?
+  instagram      String?
+  tiktok         String?
+  youtube        String?
+  city           String
+  niche          String
+  bio            String
+  gender         Gender
+  followers      String?
+  reach          String?
+  engagement     String?
+  priceMin       String?           // ex: "R$ 150"
+  priceClient    String?           // ex: "R$ 2.500,00"
+  priceCopart    String?           // ex: "R$ 1.200,00"
+  priceVideo     String?           // valor informado no formulário
+  priceRepost    String?           // valor informado no formulário
+  restrictions   String?
+  services       String?           // JSON array de serviços
+  portfolio      String?           // JSON array de itens do portfolio
+  reviews        String?           // JSON array de avaliações
+  status         InfluencerStatus  @default(PENDING)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+

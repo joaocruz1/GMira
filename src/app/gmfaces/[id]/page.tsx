@@ -1,6 +1,5 @@
-"use client"
+ "use client"
 
-import { influencers } from "@/data/influencers"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -55,35 +54,172 @@ function AnimatedCount({ target, label }: AnimatedCountProps) {
   )
 }
 
+// Função para converter string de seguidores/alcance para número
+function parseCount(value?: string): number {
+  if (!value) return 0
+  const cleaned = value.replace(/[^\d.,]/g, "").replace(",", ".")
+  const num = parseFloat(cleaned)
+  if (isNaN(num)) {
+    // Tenta extrair número de strings como "50k", "100k", "1.5M"
+    const lower = value.toLowerCase()
+    if (lower.includes("k")) {
+      const kNum = parseFloat(lower.replace("k", "").trim())
+      return isNaN(kNum) ? 0 : kNum * 1000
+    }
+    if (lower.includes("m")) {
+      const mNum = parseFloat(lower.replace("m", "").trim())
+      return isNaN(mNum) ? 0 : mNum * 1000000
+    }
+    return 0
+  }
+  return num
+}
+
+// Função para converter engagement de string para número
+function parseEngagement(value?: string): number {
+  if (!value) return 0
+  const cleaned = value.replace(/[^\d.,]/g, "").replace(",", ".")
+  const num = parseFloat(cleaned)
+  return isNaN(num) ? 0 : num
+}
+
+interface Service {
+  icon: string
+  name: string
+  description: string
+}
+
+interface PortfolioItem {
+  title: string
+  category: string
+  engagement: string
+}
+
+interface Review {
+  author: string
+  company: string
+  rating: number
+  text: string
+}
+
+interface ApiInfluencer {
+  id: string
+  name: string
+  photo?: string
+  city: string
+  niche: string
+  bio: string
+  gender?: string
+  email?: string
+  phone?: string
+  instagram?: string
+  tiktok?: string
+  youtube?: string
+  followers?: string
+  reach?: string
+  engagement?: string
+  priceMin?: string
+  priceClient?: string
+  priceCopart?: string
+  priceVideo?: string
+  priceRepost?: string
+  restrictions?: string
+  services?: string
+  portfolio?: string
+  reviews?: string
+  status?: string
+}
+
 export default function InfluencerProfile({ params }: Props) {
   const resolvedParams = use(params)
-  const influencer = influencers.find((i) => i.id === resolvedParams.id)
+  const [influencer, setInfluencer] = useState<ApiInfluencer | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadInfluencer = async () => {
+      try {
+        const res = await fetch(`/api/gmfaces/influencers/${resolvedParams.id}`)
+        if (!res.ok) {
+          if (res.status === 404) {
+            notFound()
+            return
+          }
+          throw new Error("Erro ao carregar influenciador")
+        }
+        const data = await res.json()
+        setInfluencer(data)
+      } catch (error) {
+        console.error(error)
+        notFound()
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadInfluencer()
+  }, [resolvedParams.id])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p className="text-gray-400">Carregando perfil...</p>
+      </div>
+    )
+  }
 
   if (!influencer) {
     notFound()
   }
 
-  const whatsappMessage = `Olá! Gostaria de solicitar um orçamento para a influenciadora ${influencer.name} do GM Faces.`
-  const whatsappLink = `https://wa.me/5562999999999?text=${encodeURIComponent(whatsappMessage)}`
+  const whatsappMessage = `Olá! Gostaria de solicitar um orçamento para ${influencer.name} do GM Faces.`
+  const phoneNumber = influencer.phone?.replace(/\D/g, "") || "553599574977"
+  const whatsappLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`
 
-  const portfolioItems = [
-    { title: "Campanha de Moda", category: "Moda", engagement: "8.5%" },
-    { title: "Collab com Marca X", category: "Partnership", engagement: "12.3%" },
-    { title: "Conteúdo Lifestyle", category: "Lifestyle", engagement: "6.8%" },
-    { title: "Video Tutorial", category: "Educacional", engagement: "14.2%" },
-  ]
+  // Converter valores para números
+  const followersCount = parseCount(influencer.followers)
+  const reachCount = parseCount(influencer.reach)
+  const engagementValue = parseEngagement(influencer.engagement)
 
-  const services = [
-    { icon: "📸", name: "Posts Patrocinados", description: "1-5 posts com alta qualidade" },
-    { icon: "🎬", name: "Vídeos/Reels", description: "Conteúdo para Instagram e TikTok" },
-    { icon: "✍️", name: "Storytelling", description: "Narrativas autênticas da marca" },
-    { icon: "📊", name: "Consultorias", description: "Estratégia de conteúdo e growth" },
-  ]
+  // Parsear dados do banco
+  const portfolioItems: PortfolioItem[] = influencer.portfolio
+    ? (() => {
+        try {
+          return JSON.parse(influencer.portfolio)
+        } catch {
+          return []
+        }
+      })()
+    : []
 
-  const reviews = [
-    { author: "Brand Manager", company: "Brand X", rating: 5, text: "Profissional e muito criativa!" },
-    { author: "Marketing Director", company: "Brand Y", rating: 5, text: "Excelente engagement e retorno." },
-  ]
+  const services: Service[] = influencer.services
+    ? (() => {
+        try {
+          return JSON.parse(influencer.services)
+        } catch {
+          return [
+            { icon: "📸", name: "Posts Patrocinados", description: "1-5 posts com alta qualidade" },
+            { icon: "🎬", name: "Vídeos/Reels", description: "Conteúdo para Instagram e TikTok" },
+            { icon: "✍️", name: "Storytelling", description: "Narrativas autênticas da marca" },
+            { icon: "📊", name: "Consultorias", description: "Estratégia de conteúdo e growth" },
+          ]
+        }
+      })()
+    : [
+        { icon: "📸", name: "Posts Patrocinados", description: "1-5 posts com alta qualidade" },
+        { icon: "🎬", name: "Vídeos/Reels", description: "Conteúdo para Instagram e TikTok" },
+        { icon: "✍️", name: "Storytelling", description: "Narrativas autênticas da marca" },
+        { icon: "📊", name: "Consultorias", description: "Estratégia de conteúdo e growth" },
+      ]
+
+  const reviews: Review[] = influencer.reviews
+    ? (() => {
+        try {
+          return JSON.parse(influencer.reviews)
+        } catch {
+          return []
+        }
+      })()
+    : []
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -103,8 +239,20 @@ export default function InfluencerProfile({ params }: Props) {
         <div className="absolute inset-0 bg-gradient-to-b from-purple-600/30 to-black/80 z-10"></div>
 
         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-900 via-purple-800 to-pink-900">
-          <div className="text-center">
-            <div className="text-8xl font-bold text-white/10 mb-4">{influencer.name.substring(0, 1)}</div>
+          {influencer.photo ? (
+            <div className="absolute inset-0">
+              <img
+                src={influencer.photo}
+                alt={influencer.name}
+                className="w-full h-full object-cover opacity-30"
+              />
+            </div>
+          ) : (
+            <div className="text-8xl font-bold text-white/10 mb-4 absolute inset-0 flex items-center justify-center">
+              {influencer.name.substring(0, 1)}
+            </div>
+          )}
+          <div className="text-center relative z-10">
             <div className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
               {influencer.name}
             </div>
@@ -112,8 +260,22 @@ export default function InfluencerProfile({ params }: Props) {
         </div>
 
         <div className="absolute bottom-8 left-8 z-20 flex items-center gap-3">
-          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-300">Disponível para colaborações</span>
+          {influencer.status === "PUBLISHED" ? (
+            <>
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-sm text-gray-300">Disponível para colaborações</span>
+            </>
+          ) : influencer.status === "PENDING" ? (
+            <>
+              <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
+              <span className="text-sm text-gray-300">Aguardando aprovação</span>
+            </>
+          ) : (
+            <>
+              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              <span className="text-sm text-gray-300">Indisponível</span>
+            </>
+          )}
         </div>
       </div>
 
@@ -162,22 +324,51 @@ export default function InfluencerProfile({ params }: Props) {
             <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 transition-all duration-300">
               <h3 className="text-sm font-semibold text-gray-200 mb-4 uppercase tracking-wider">Conecte</h3>
               <div className="space-y-3">
-                <a
-                  href="#"
-                  className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-300 group/link"
-                >
-                  <Instagram className="w-5 h-5 text-pink-400" />
-                  <span className="text-sm text-gray-300 group-hover/link:text-white">Instagram</span>
-                  <Share2 className="w-4 h-4 text-gray-600 group-hover/link:text-gray-300 ml-auto" />
-                </a>
-                <a
-                  href="#"
-                  className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-300 group/link"
-                >
-                  <MessageCircle className="w-5 h-5 text-purple-400" />
-                  <span className="text-sm text-gray-300 group-hover/link:text-white">TikTok</span>
-                  <Share2 className="w-4 h-4 text-gray-600 group-hover/link:text-gray-300 ml-auto" />
-                </a>
+                {influencer.instagram && (
+                  <a
+                    href={`https://instagram.com/${influencer.instagram.replace("@", "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-300 group/link"
+                  >
+                    <Instagram className="w-5 h-5 text-pink-400" />
+                    <span className="text-sm text-gray-300 group-hover/link:text-white">
+                      {influencer.instagram}
+                    </span>
+                    <Share2 className="w-4 h-4 text-gray-600 group-hover/link:text-gray-300 ml-auto" />
+                  </a>
+                )}
+                {influencer.tiktok && (
+                  <a
+                    href={`https://tiktok.com/@${influencer.tiktok.replace("@", "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-300 group/link"
+                  >
+                    <MessageCircle className="w-5 h-5 text-purple-400" />
+                    <span className="text-sm text-gray-300 group-hover/link:text-white">
+                      {influencer.tiktok}
+                    </span>
+                    <Share2 className="w-4 h-4 text-gray-600 group-hover/link:text-gray-300 ml-auto" />
+                  </a>
+                )}
+                {influencer.youtube && (
+                  <a
+                    href={`https://youtube.com/@${influencer.youtube.replace("@", "").replace(/\s+/g, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-300 group/link"
+                  >
+                    <Share2 className="w-5 h-5 text-red-400" />
+                    <span className="text-sm text-gray-300 group-hover/link:text-white">
+                      {influencer.youtube}
+                    </span>
+                    <Share2 className="w-4 h-4 text-gray-600 group-hover/link:text-gray-300 ml-auto" />
+                  </a>
+                )}
+                {!influencer.instagram && !influencer.tiktok && !influencer.youtube && (
+                  <p className="text-sm text-gray-500 text-center py-4">Nenhuma rede social cadastrada</p>
+                )}
               </div>
             </div>
           </div>
@@ -186,56 +377,83 @@ export default function InfluencerProfile({ params }: Props) {
           <div className="lg:col-span-2 space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-                <AnimatedCount target={850000} label="Seguidores" />
+                {followersCount > 0 ? (
+                  <AnimatedCount target={followersCount} label="Seguidores" />
+                ) : (
+                  <div className="group">
+                    <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                      {influencer.followers || "—"}
+                    </div>
+                    <p className="text-sm text-gray-400 mt-2">Seguidores</p>
+                  </div>
+                )}
               </div>
               <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-                <AnimatedCount target={125000} label="Alcance Médio" />
+                {reachCount > 0 ? (
+                  <AnimatedCount target={reachCount} label="Alcance Médio" />
+                ) : (
+                  <div className="group">
+                    <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                      {influencer.reach || "—"}
+                    </div>
+                    <p className="text-sm text-gray-400 mt-2">Alcance Médio</p>
+                  </div>
+                )}
               </div>
               <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-                <AnimatedCount target={8.5} label="Engagement %" />
+                {engagementValue > 0 ? (
+                  <AnimatedCount target={engagementValue} label="Engagement %" />
+                ) : (
+                  <div className="group">
+                    <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                      {influencer.engagement || "—"}
+                    </div>
+                    <p className="text-sm text-gray-400 mt-2">Engagement %</p>
+                  </div>
+                )}
               </div>
             </div>
 
-            <Card className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border-white/10 hover:border-purple-500/50 transition-all duration-300">
+            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur border-white/20 hover:border-purple-500/50 transition-all duration-300">
               <CardHeader>
-                <CardTitle className="text-lg">Serviços</CardTitle>
+                <CardTitle className="text-lg text-white">Serviços</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-3">
                   {services.map((service, idx) => (
                     <div
                       key={idx}
-                      className="bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/50 rounded-lg p-3 transition-all duration-300 group/service cursor-pointer"
+                      className="bg-slate-700/50 hover:bg-slate-700/70 border border-slate-600/50 hover:border-purple-500/50 rounded-lg p-3 transition-all duration-300 group/service cursor-pointer"
                     >
                       <div className="text-2xl mb-2">{service.icon}</div>
-                      <p className="text-xs font-semibold text-gray-200 group-hover/service:text-purple-300 transition-colors">
+                      <p className="text-xs font-semibold text-white group-hover/service:text-purple-300 transition-colors">
                         {service.name}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">{service.description}</p>
+                      <p className="text-xs text-gray-300 mt-1">{service.description}</p>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border-white/10 hover:border-purple-500/50 transition-all duration-300">
+            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur border-white/20 hover:border-purple-500/50 transition-all duration-300">
               <CardHeader>
-                <CardTitle className="text-lg">Portfolio</CardTitle>
+                <CardTitle className="text-lg text-white">Portfolio</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   {portfolioItems.map((item, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-300 group/item cursor-pointer"
+                      className="flex items-center justify-between p-3 bg-slate-700/50 hover:bg-slate-700/70 border border-slate-600/50 hover:border-purple-500/50 rounded-lg transition-all duration-300 group/item cursor-pointer"
                     >
                       <div className="flex-1">
-                        <p className="text-sm font-semibold text-gray-200 group-hover/item:text-white">{item.title}</p>
-                        <p className="text-xs text-gray-500">{item.category}</p>
+                        <p className="text-sm font-semibold text-white group-hover/item:text-purple-300 transition-colors">{item.title}</p>
+                        <p className="text-xs text-gray-300">{item.category}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Heart className="w-4 h-4 text-gray-600" />
-                        <span className="text-xs text-gray-400 font-medium">{item.engagement}</span>
+                        <Heart className="w-4 h-4 text-pink-400" />
+                        <span className="text-xs text-gray-200 font-medium">{item.engagement}</span>
                       </div>
                     </div>
                   ))}
@@ -287,17 +505,38 @@ export default function InfluencerProfile({ params }: Props) {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300">Para Cliente Final</span>
-                    <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-                      R$ 5.000
-                    </span>
-                  </div>
-                  <div className="h-px bg-gradient-to-r from-purple-500/30 to-pink-500/30"></div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300">Coparticipação</span>
-                    <span className="text-xl font-bold text-purple-400">R$ 1.500</span>
-                  </div>
+                  {influencer.priceClient && (
+                    <>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300">Para Cliente Final</span>
+                        <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                          {influencer.priceClient}
+                        </span>
+                      </div>
+                      {influencer.priceCopart && (
+                        <>
+                          <div className="h-px bg-gradient-to-r from-purple-500/30 to-pink-500/30"></div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-300">Coparticipação</span>
+                            <span className="text-xl font-bold text-purple-400">{influencer.priceCopart}</span>
+                          </div>
+                        </>
+                      )}
+                    </>
+                  )}
+                  {!influencer.priceClient && influencer.priceMin && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300">Preço a partir de</span>
+                      <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                        {influencer.priceMin}
+                      </span>
+                    </div>
+                  )}
+                  {!influencer.priceClient && !influencer.priceMin && (
+                    <div className="text-center py-4">
+                      <span className="text-gray-400">Sob consulta</span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

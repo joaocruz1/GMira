@@ -4,11 +4,10 @@ import { useState, useEffect, useCallback, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
-import { influencers } from "@/data/influencers"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import FadeIn from "@/components/ui/fade-in"
-import { Menu, X, ChevronDown } from "lucide-react"
+import { Menu, X, ChevronDown, Lock } from "lucide-react"
 
 const niches = ["Todos", "Moda", "Tecnologia", "Entretenimento"]
 const cities = ["Todas", "São Paulo", "Rio de Janeiro", "Belo Horizonte"]
@@ -312,6 +311,20 @@ function NavButton({
   )
 }
 
+interface ApiInfluencer {
+  id: string
+  name: string
+  photo?: string
+  city: string
+  niche: string
+  bio: string
+  gender?: string
+  followers?: string
+  reach?: string
+  engagement?: string
+  priceMin?: string
+}
+
 export default function GMFacesCatalog() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedNiche, setSelectedNiche] = useState("Todos")
@@ -334,6 +347,28 @@ export default function GMFacesCatalog() {
     priceRepost: "",
     bio: "",
   })
+  const [influencers, setInfluencers] = useState<ApiInfluencer[]>([])
+  const [isLoadingInfluencers, setIsLoadingInfluencers] = useState(true)
+  const [formSubmitting, setFormSubmitting] = useState(false)
+  const [formMessage, setFormMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    const loadInfluencers = async () => {
+      try {
+        const res = await fetch("/api/gmfaces/influencers")
+        if (!res.ok) throw new Error("Erro ao carregar influenciadores")
+        const data = await res.json()
+        setInfluencers(data)
+      } catch (error) {
+        console.error(error)
+        setInfluencers([])
+      } finally {
+        setIsLoadingInfluencers(false)
+      }
+    }
+
+    loadInfluencers()
+  }, [])
 
   // Função para lidar com o clique no botão do WhatsApp
   const handleWhatsAppClick = () => {
@@ -514,7 +549,11 @@ export default function GMFacesCatalog() {
               <div className="flex items-center gap-2">
                 <div className="h-px flex-1 bg-gradient-to-r from-transparent to-purple-500"></div>
                 <span className="text-sm font-medium text-purple-300 px-2">
-                  {filteredInfluencers.length} resultado{filteredInfluencers.length !== 1 ? "s" : ""}
+                  {isLoadingInfluencers
+                    ? "Carregando influenciadores..."
+                    : `${filteredInfluencers.length} resultado${
+                        filteredInfluencers.length !== 1 ? "s" : ""
+                      }`}
                 </span>
                 <div className="h-px flex-1 bg-gradient-to-l from-transparent to-purple-500"></div>
               </div>
@@ -526,7 +565,9 @@ export default function GMFacesCatalog() {
       {/* Catalog Grid */}
       <section className="px-4 md:px-8 max-w-7xl mx-auto py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredInfluencers.length > 0 ? (
+          {isLoadingInfluencers ? (
+            <div className="col-span-full text-center py-24 text-gray-400">Carregando catálogo...</div>
+          ) : filteredInfluencers.length > 0 ? (
             filteredInfluencers.map((influencer, index) => (
               <FadeIn key={influencer.id} delay={index * 0.05}>
                 <div
@@ -539,19 +580,30 @@ export default function GMFacesCatalog() {
                   <Card className="relative bg-slate-950/50 border border-white/10 hover:border-purple-500/50 transition-all duration-500 overflow-hidden h-full flex flex-col backdrop-blur-xl hover:shadow-2xl hover:shadow-purple-600/20 transform group-hover:scale-105 group-hover:-translate-y-2">
                     {/* Foto do influenciador */}
                     <div className="aspect-square bg-gradient-to-br from-purple-950 via-slate-900 to-slate-950 relative overflow-hidden">
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <div className="absolute inset-0 bg-gradient-to-br from-purple-950/40 to-pink-900/40 opacity-60"></div>
-                        <svg
-                          className="w-20 h-20 text-purple-400/40 mb-2 relative z-10"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                        </svg>
-                        <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 relative z-10 tracking-wider">
-                          {influencer.name.substring(0, 2).toUpperCase()}
-                        </span>
-                      </div>
+                      {influencer.photo ? (
+                        <>
+                          <img
+                            src={influencer.photo}
+                            alt={influencer.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-br from-purple-950/40 to-pink-900/40 opacity-60"></div>
+                        </>
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <div className="absolute inset-0 bg-gradient-to-br from-purple-950/40 to-pink-900/40 opacity-60"></div>
+                          <svg
+                            className="w-20 h-20 text-purple-400/40 mb-2 relative z-10"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                          </svg>
+                          <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 relative z-10 tracking-wider">
+                            {influencer.name.substring(0, 2).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
 
                       {/* Badge da categoria */}
                       <div className="absolute top-3 right-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg backdrop-blur-sm border border-purple-400/30 z-20">
@@ -588,7 +640,8 @@ export default function GMFacesCatalog() {
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-lg">📈</span>
                         <span className="text-gray-300">
-                          <span className="font-semibold text-white">Engajamento médio:</span> {influencer.engagement}
+                          <span className="font-semibold text-white">Engajamento médio:</span>{" "}
+                          {influencer.engagement ?? "—"}
                         </span>
                       </div>
 
@@ -596,7 +649,8 @@ export default function GMFacesCatalog() {
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-lg">💰</span>
                         <span className="text-gray-300">
-                          <span className="font-semibold text-white">Cachê a partir de</span> {influencer.price_min}{" "}
+                          <span className="font-semibold text-white">Cachê a partir de</span>{" "}
+                          {influencer.priceMin ?? "Sob consulta"}{" "}
                           <span className="text-gray-400">por vídeo</span>
                         </span>
                       </div>
@@ -1060,11 +1114,41 @@ export default function GMFacesCatalog() {
                 </div>
 
                 <form
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault()
-                    // Aqui você pode adicionar a lógica de envio do formulário
-                    alert("Formulário enviado! Entraremos em contato em breve.")
-                    setIsFormOpen(false)
+                    setFormMessage(null)
+                    setFormSubmitting(true)
+                    try {
+                      const res = await fetch("/api/gmfaces/applications", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(formData),
+                      })
+                      const data = await res.json()
+                      if (!res.ok) {
+                        throw new Error(data.error || "Erro ao enviar cadastro.")
+                      }
+                      setFormMessage(data.message || "Cadastro enviado com sucesso!")
+                      setFormData({
+                        name: "",
+                        email: "",
+                        phone: "",
+                        instagram: "",
+                        niche: "",
+                        city: "",
+                        followers: "",
+                        engagement: "",
+                        priceVideo: "",
+                        priceRepost: "",
+                        bio: "",
+                      })
+                      setIsFormOpen(false)
+                    } catch (error: any) {
+                      console.error(error)
+                      setFormMessage(error.message ?? "Erro ao enviar cadastro. Tente novamente.")
+                    } finally {
+                      setFormSubmitting(false)
+                    }
                   }}
                   className="space-y-4"
                 >
@@ -1197,12 +1281,13 @@ export default function GMFacesCatalog() {
                     />
                   </div>
                   <div className="flex gap-4 pt-4">
-                    <Button
-                      type="submit"
-                      className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-bold py-3 rounded-lg shadow-lg shadow-purple-600/50 transition-all duration-300"
-                    >
-                      Enviar Cadastro
-                    </Button>
+                      <Button
+                        type="submit"
+                        disabled={formSubmitting}
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-bold py-3 rounded-lg shadow-lg shadow-purple-600/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {formSubmitting ? "Enviando..." : "Enviar Cadastro"}
+                      </Button>
                     <Button
                       type="button"
                       variant="outline"
@@ -1235,6 +1320,17 @@ export default function GMFacesCatalog() {
           </div>
         </FadeIn>
       </section>
+
+      {/* Botão Admin Sutil */}
+      <Link
+        href="/gmfaces/admin/login"
+        className="fixed bottom-6 right-6 z-50 group"
+        title="Área Admin"
+      >
+        <div className="w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/30 backdrop-blur-sm transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-purple-500/20">
+          <Lock className="w-4 h-4 text-gray-400 group-hover:text-purple-400 transition-colors duration-300" />
+        </div>
+      </Link>
     </div>
   )
 }
