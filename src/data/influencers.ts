@@ -8,6 +8,8 @@ export interface Influencer {
   gender: 'Masculino' | 'Feminino' | 'Outro';
   followers: string;
   reach: string;
+  engagement: string; // Engajamento médio (ex: "4,8%")
+  price_min: string; // Preço mínimo (ex: "R$ 150")
   restrictions?: string;
   price_client: string;
   price_copart: string;
@@ -29,6 +31,8 @@ export const influencers: Influencer[] = [
     gender: 'Feminino',
     followers: '150k',
     reach: '450k',
+    engagement: '4,8%',
+    price_min: 'R$ 150',
     restrictions: 'Não divulga jogos de azar',
     price_client: 'R$ 2.500,00',
     price_copart: 'R$ 1.200,00',
@@ -47,6 +51,8 @@ export const influencers: Influencer[] = [
     gender: 'Masculino',
     followers: '85k',
     reach: '200k',
+    engagement: '5,2%',
+    price_min: 'R$ 200',
     price_client: 'R$ 3.000,00',
     price_copart: 'R$ 1.500,00',
     socials: {
@@ -64,6 +70,8 @@ export const influencers: Influencer[] = [
     gender: 'Feminino',
     followers: '320k',
     reach: '900k',
+    engagement: '6,1%',
+    price_min: 'R$ 300',
     restrictions: 'Apenas marcas cruelty-free',
     price_client: 'R$ 4.500,00',
     price_copart: 'R$ 2.000,00',
@@ -82,6 +90,8 @@ export const influencers: Influencer[] = [
     gender: 'Masculino',
     followers: '45k',
     reach: '120k',
+    engagement: '4,5%',
+    price_min: 'R$ 120',
     price_client: 'R$ 1.800,00',
     price_copart: 'R$ 800,00',
     socials: {
@@ -99,6 +109,8 @@ export const influencers: Influencer[] = [
     gender: 'Feminino',
     followers: '210k',
     reach: '600k',
+    engagement: '5,5%',
+    price_min: 'R$ 180',
     price_client: 'R$ 3.200,00',
     price_copart: 'R$ 1.600,00',
     socials: {
@@ -115,6 +127,8 @@ export const influencers: Influencer[] = [
     gender: 'Masculino',
     followers: '120k',
     reach: '350k',
+    engagement: '4,9%',
+    price_min: 'R$ 170',
     restrictions: 'Não faz publi de dropshipping duvidoso',
     price_client: 'R$ 2.800,00',
     price_copart: 'R$ 1.400,00',
@@ -124,5 +138,6 @@ export const influencers: Influencer[] = [
     }
   }
 ];
+
 
 

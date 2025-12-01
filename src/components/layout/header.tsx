@@ -57,8 +57,8 @@ function Header() {
     }`, [scrolled]
   )
 
-  // Não renderizar o header na página raiz (landingpage)
-  if (pathname === "/") {
+  // Não renderizar o header na página raiz (landingpage) e na página gmfaces (tem header próprio)
+  if (pathname === "/" || pathname.startsWith("/gmfaces")) {
     return null
   }
 
