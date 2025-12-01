@@ -15,3 +15,4 @@ bcrypt.hash(password, 10).then(hash => {
   console.error('Erro ao gerar hash:', err);
 });
 
+

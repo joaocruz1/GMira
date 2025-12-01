@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { writeFile, mkdir } from "fs/promises"
-import { join } from "path"
-import { existsSync } from "fs"
+import { put } from "@vercel/blob"
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,32 +25,35 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Arquivo muito grande. Máximo 5MB" }, { status: 400 })
     }
 
-    // Criar diretório se não existir
-    const uploadDir = join(process.cwd(), "public", "uploads", "influencers")
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true })
+    // Verificar se o token está configurado
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return NextResponse.json(
+        { error: "BLOB_READ_WRITE_TOKEN não configurado" },
+        { status: 500 },
+      )
     }
 
     // Gerar nome único para o arquivo
     const timestamp = Date.now()
     const randomStr = Math.random().toString(36).substring(2, 15)
     const extension = file.name.split(".").pop()
-    const fileName = `${timestamp}-${randomStr}.${extension}`
+    const fileName = `influencers/${timestamp}-${randomStr}.${extension}`
 
-    // Salvar arquivo
+    // Converter File para Buffer
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    const filePath = join(uploadDir, fileName)
 
-    await writeFile(filePath, buffer)
+    // Fazer upload para Vercel Blob
+    const { url } = await put(fileName, buffer, {
+      access: "public",
+      contentType: file.type,
+    })
 
-    // Retornar URL da imagem
-    const imageUrl = `/uploads/influencers/${fileName}`
-
-    return NextResponse.json({ url: imageUrl }, { status: 200 })
+    return NextResponse.json({ url }, { status: 200 })
   } catch (error) {
     console.error("Erro ao fazer upload:", error)
     return NextResponse.json({ error: "Erro ao fazer upload da imagem" }, { status: 500 })
   }
 }
+
 

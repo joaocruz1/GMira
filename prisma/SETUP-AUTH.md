@@ -48,3 +48,4 @@ Acesse: `http://localhost:3000/gmfaces/admin/login`
 - Considere implementar JWT tokens em vez de cookies simples
 - Habilite HTTPS em produção
 
+
