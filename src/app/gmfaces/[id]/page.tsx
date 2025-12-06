@@ -118,6 +118,10 @@ interface ApiInfluencer {
   followers?: string
   reach?: string
   engagement?: string
+  views30Days?: string
+  reach30Days?: string
+  averageReels?: string
+  localAudience?: string
   priceMin?: string
   priceClient?: string
   priceCopart?: string
@@ -284,10 +288,52 @@ export default function InfluencerProfile({ params }: Props) {
           <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-4 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300 group/card">
             <div className="flex items-center gap-3 mb-2">
               <TrendingUp className="w-5 h-5 text-purple-400" />
-              <p className="text-xs text-gray-400 uppercase tracking-wider">Niche</p>
+              <p className="text-xs text-gray-400 uppercase tracking-wider">
+                Nicho{(() => {
+                  try {
+                    const nicheData = JSON.parse(influencer.niche || "[]")
+                    if (typeof nicheData === "object" && nicheData !== null && nicheData.niches) {
+                      return nicheData.niches.length > 1 ? "s" : ""
+                    }
+                    if (Array.isArray(nicheData) && nicheData.length > 1) {
+                      return "s"
+                    }
+                  } catch {}
+                  return ""
+                })()}
+              </p>
             </div>
             <p className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-              {influencer.niche}
+              {(() => {
+                try {
+                  const nicheData = JSON.parse(influencer.niche || "[]")
+                  if (typeof nicheData === "object" && nicheData !== null && nicheData.niches) {
+                    // Formato novo: mostrar todos os nichos, com o principal primeiro
+                    const allNiches = [...nicheData.niches]
+                    const mainIndex = allNiches.indexOf(nicheData.mainNiche)
+                    if (mainIndex > 0) {
+                      allNiches.splice(mainIndex, 1)
+                      allNiches.unshift(nicheData.mainNiche)
+                    }
+                    return allNiches.join(" • ")
+                  }
+                  if (Array.isArray(nicheData) && nicheData.length > 0) {
+                    return nicheData.join(" • ")
+                  }
+                } catch {}
+                return influencer.niche
+              })()}
+            </p>
+            <p className="text-xs text-purple-400 mt-1 font-semibold">
+              {(() => {
+                try {
+                  const nicheData = JSON.parse(influencer.niche || "[]")
+                  if (typeof nicheData === "object" && nicheData !== null && nicheData.mainNiche) {
+                    return `Principal: ${nicheData.mainNiche}`
+                  }
+                } catch {}
+                return ""
+              })()}
             </p>
           </div>
 
@@ -375,89 +421,121 @@ export default function InfluencerProfile({ params }: Props) {
 
           {/* Right Column - Stats */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-                {followersCount > 0 ? (
-                  <AnimatedCount target={followersCount} label="Seguidores" />
-                ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {influencer.views30Days && (
+                <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
                   <div className="group">
                     <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-                      {influencer.followers || "—"}
+                      {influencer.views30Days}
                     </div>
-                    <p className="text-sm text-gray-400 mt-2">Seguidores</p>
+                    <p className="text-sm text-gray-400 mt-2">Vizualizações 30 dias</p>
                   </div>
-                )}
-              </div>
-              <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-                {reachCount > 0 ? (
-                  <AnimatedCount target={reachCount} label="Alcance Médio" />
-                ) : (
+                </div>
+              )}
+              {influencer.reach30Days && (
+                <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
                   <div className="group">
                     <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-                      {influencer.reach || "—"}
+                      {influencer.reach30Days}
                     </div>
-                    <p className="text-sm text-gray-400 mt-2">Alcance Médio</p>
+                    <p className="text-sm text-gray-400 mt-2">Alcance 30 dias</p>
                   </div>
-                )}
-              </div>
-              <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-                {engagementValue > 0 ? (
-                  <AnimatedCount target={engagementValue} label="Engagement %" />
-                ) : (
+                </div>
+              )}
+              {influencer.averageReels && (
+                <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
                   <div className="group">
                     <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-                      {influencer.engagement || "—"}
+                      {influencer.averageReels}
                     </div>
-                    <p className="text-sm text-gray-400 mt-2">Engagement %</p>
+                    <p className="text-sm text-gray-400 mt-2">Média por reels</p>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
+              {influencer.localAudience && (
+                <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
+                  <div className="group">
+                    <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                      {influencer.localAudience}
+                    </div>
+                    <p className="text-sm text-gray-400 mt-2">Público local</p>
+                  </div>
+                </div>
+              )}
+              {/* Fallback para métricas antigas se novos campos não existirem */}
+              {!influencer.views30Days && !influencer.reach30Days && !influencer.averageReels && !influencer.localAudience && (
+                <>
+                  <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
+                    {followersCount > 0 ? (
+                      <AnimatedCount target={followersCount} label="Seguidores" />
+                    ) : (
+                      <div className="group">
+                        <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                          {influencer.followers || "—"}
+                        </div>
+                        <p className="text-sm text-gray-400 mt-2">Seguidores</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
+                    {reachCount > 0 ? (
+                      <AnimatedCount target={reachCount} label="Alcance Médio" />
+                    ) : (
+                      <div className="group">
+                        <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                          {influencer.reach || "—"}
+                        </div>
+                        <p className="text-sm text-gray-400 mt-2">Alcance Médio</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
+                    {engagementValue > 0 ? (
+                      <AnimatedCount target={engagementValue} label="Engagement %" />
+                    ) : (
+                      <div className="group">
+                        <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                          {influencer.engagement || "—"}
+                        </div>
+                        <p className="text-sm text-gray-400 mt-2">Engagement %</p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
 
             <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur border-white/20 hover:border-purple-500/50 transition-all duration-300">
               <CardHeader>
-                <CardTitle className="text-lg text-white">Serviços</CardTitle>
+                <CardTitle className="text-2xl font-bold text-white mb-2">Portfolio</CardTitle>
+                <p className="text-sm text-gray-400">Conheça alguns dos trabalhos realizados</p>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-3">
-                  {services.map((service, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-slate-700/50 hover:bg-slate-700/70 border border-slate-600/50 hover:border-purple-500/50 rounded-lg p-3 transition-all duration-300 group/service cursor-pointer"
-                    >
-                      <div className="text-2xl mb-2">{service.icon}</div>
-                      <p className="text-xs font-semibold text-white group-hover/service:text-purple-300 transition-colors">
-                        {service.name}
-                      </p>
-                      <p className="text-xs text-gray-300 mt-1">{service.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur border-white/20 hover:border-purple-500/50 transition-all duration-300">
-              <CardHeader>
-                <CardTitle className="text-lg text-white">Portfolio</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {portfolioItems.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between p-3 bg-slate-700/50 hover:bg-slate-700/70 border border-slate-600/50 hover:border-purple-500/50 rounded-lg transition-all duration-300 group/item cursor-pointer"
-                    >
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-white group-hover/item:text-purple-300 transition-colors">{item.title}</p>
-                        <p className="text-xs text-gray-300">{item.category}</p>
+                {portfolioItems.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {portfolioItems.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-gradient-to-br from-slate-700/70 to-slate-800/70 hover:from-slate-700/90 hover:to-slate-800/90 border border-slate-600/50 hover:border-purple-500/50 rounded-xl p-6 transition-all duration-300 group/item cursor-pointer transform hover:scale-105"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <p className="text-lg font-bold text-white group-hover/item:text-purple-300 transition-colors mb-2">{item.title}</p>
+                            <p className="text-sm text-gray-300 mb-4">{item.category}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 pt-4 border-t border-slate-600/50">
+                          <Heart className="w-5 h-5 text-pink-400" />
+                          <span className="text-sm text-gray-200 font-semibold">{item.engagement}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Heart className="w-4 h-4 text-pink-400" />
-                        <span className="text-xs text-gray-200 font-medium">{item.engagement}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-gray-400">Nenhum item no portfólio ainda</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -501,42 +579,44 @@ export default function InfluencerProfile({ params }: Props) {
             <Card className="bg-gradient-to-br from-purple-600/10 to-pink-600/10 backdrop-blur border-purple-500/30 hover:border-purple-500/60 transition-all duration-300 group">
               <div className="h-1 bg-gradient-to-r from-purple-500 to-pink-500 group-hover:shadow-[0_0_30px_rgba(236,72,153,0.5)] transition-all duration-300"></div>
               <CardHeader>
-                <CardTitle className="text-xl">Investimento</CardTitle>
+                <CardTitle className="text-xl">Avaliações</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  {influencer.priceClient && (
-                    <>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Para Cliente Final</span>
-                        <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-                          {influencer.priceClient}
-                        </span>
-                      </div>
+                {(influencer.priceClient || influencer.priceCopart) && (
+                  <div className="border border-purple-500/30 rounded-lg p-4 bg-purple-500/5">
+                    <div className="space-y-3">
+                      {influencer.priceClient && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-300">Para Cliente Final</span>
+                          <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                            {influencer.priceClient}
+                          </span>
+                        </div>
+                      )}
                       {influencer.priceCopart && (
                         <>
-                          <div className="h-px bg-gradient-to-r from-purple-500/30 to-pink-500/30"></div>
+                          {influencer.priceClient && (
+                            <div className="h-px bg-gradient-to-r from-purple-500/30 to-pink-500/30"></div>
+                          )}
                           <div className="flex justify-between items-center">
                             <span className="text-gray-300">Coparticipação</span>
                             <span className="text-xl font-bold text-purple-400">{influencer.priceCopart}</span>
                           </div>
                         </>
                       )}
-                    </>
-                  )}
-                  {!influencer.priceClient && influencer.priceMin && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-300">Preço a partir de</span>
-                      <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-                        {influencer.priceMin}
-                      </span>
                     </div>
-                  )}
-                  {!influencer.priceClient && !influencer.priceMin && (
-                    <div className="text-center py-4">
-                      <span className="text-gray-400">Sob consulta</span>
-                    </div>
-                  )}
+                  </div>
+                )}
+                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-lg p-4 border border-slate-700/50">
+                  <div className="mb-2">
+                    <p className="text-sm font-semibold text-gray-300 mb-1">Preço Mínimo por Campanha</p>
+                    <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                      A partir de {influencer.priceClient || influencer.priceCopart || "R$ 300"}
+                    </p>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-3 leading-relaxed">
+                    Valores podem variar conforme tipo de conteúdo, roteiro, deslocamento e necessidade da marca.
+                  </p>
                 </div>
               </CardContent>
             </Card>

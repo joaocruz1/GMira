@@ -13,28 +13,64 @@ export async function POST(req: NextRequest) {
       niche,
       city,
       followers,
-      engagement,
+      views30Days,
+      reach30Days,
+      averageReels,
+      localAudience,
       priceVideo,
       priceRepost,
       bio,
       gender,
     } = body
 
+    // Validar que niche existe e não está vazio
     if (!name || !email || !phone || !instagram || !niche || !city || !bio) {
       return NextResponse.json({ error: "Preencha todos os campos obrigatórios." }, { status: 400 })
     }
 
+    // Validar que niche é um JSON válido com formato { niches: [...], mainNiche: "..." }
+    let nicheData: { niches: string[]; mainNiche: string } | null = null
+    try {
+      const parsed = JSON.parse(niche)
+      if (typeof parsed === "object" && parsed !== null && parsed.niches && parsed.mainNiche) {
+        // Formato novo: { niches: [...], mainNiche: "..." }
+        if (!Array.isArray(parsed.niches) || parsed.niches.length !== 3) {
+          return NextResponse.json({ error: "Selecione exatamente 3 nichos principais." }, { status: 400 })
+        }
+        if (!parsed.mainNiche || !parsed.niches.includes(parsed.mainNiche)) {
+          return NextResponse.json({ error: "O nicho principal deve estar entre os 3 nichos selecionados." }, { status: 400 })
+        }
+        nicheData = parsed
+      } else if (Array.isArray(parsed)) {
+        // Formato antigo: array de nichos (compatibilidade)
+        if (parsed.length === 0) {
+          return NextResponse.json({ error: "Selecione pelo menos 1 nicho principal." }, { status: 400 })
+        }
+        nicheData = { niches: parsed, mainNiche: parsed[0] }
+      } else {
+        // String única (compatibilidade com dados antigos)
+        nicheData = { niches: [niche], mainNiche: niche }
+      }
+    } catch {
+      // Se não for JSON, tratar como string única (compatibilidade com dados antigos)
+      nicheData = { niches: [niche], mainNiche: niche }
+    }
+
     // Para criadores que se cadastram, criamos o registro como PENDING
+    // Salvamos os nichos como JSON string no formato { niches: [...], mainNiche: "..." }
     const influencer = await prisma.influencer.create({
       data: {
         name,
         email,
         phone,
         instagram,
-        niche,
+        niche: JSON.stringify(nicheData),
         city,
         followers,
-        engagement,
+        views30Days,
+        reach30Days,
+        averageReels,
+        localAudience,
         priceVideo,
         priceRepost,
         bio,
@@ -55,6 +91,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Erro ao enviar cadastro. Tente novamente mais tarde." }, { status: 500 })
   }
 }
+
 
 
 

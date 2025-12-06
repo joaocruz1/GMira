@@ -8,6 +8,23 @@ import { motion, AnimatePresence } from "framer-motion"
 import { X, LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
 
+const availableNiches = [
+  "Moda / Look / Lifestyle",
+  "Beleza / Maquiagem / Skincare",
+  "Fitness / Saúde / Bem-estar",
+  "Alimentação / Gastronomia",
+  "Moda Infantil / Maternidade",
+  "Música / Artista / Performance",
+  "Agro / Rural / Campo",
+  "Negócios / Empreendedorismo",
+  "Humor / Entretenimento",
+  "Pets / Animais",
+  "Relacionamentos / Vida pessoal",
+  "Educação / Estudos / Profissional",
+  "Esportes",
+  "Games / Tecnologia",
+]
+
 interface Service {
   icon: string
   name: string
@@ -44,6 +61,10 @@ interface AdminInfluencer {
   bio?: string
   followers?: string
   engagement?: string
+  views30Days?: string
+  reach30Days?: string
+  averageReels?: string
+  localAudience?: string
   priceMin?: string
   priceCopart?: string
   priceVideo?: string
@@ -88,16 +109,19 @@ export default function AdminDashboard() {
     tiktok: "",
     youtube: "",
     city: "",
-    niche: "",
+    niches: [] as string[],
+    mainNiche: "",
     bio: "",
     gender: "OUTRO",
     followers: "",
     reach: "",
     engagement: "",
-    priceMin: "",
+    views30Days: "",
+    reach30Days: "",
+    averageReels: "",
+    localAudience: "",
     priceClient: "",
     priceCopart: "",
-    priceVideo: "",
     priceRepost: "",
     restrictions: "",
     status: "PUBLISHED",
@@ -167,16 +191,45 @@ export default function AdminDashboard() {
         tiktok: influencer.tiktok || "",
         youtube: influencer.youtube || "",
         city: influencer.city || "",
-        niche: influencer.niche || "",
+        niches: (() => {
+          try {
+            const nicheData = JSON.parse(influencer.niche || "[]")
+            if (typeof nicheData === "object" && nicheData !== null && nicheData.niches) {
+              return nicheData.niches
+            }
+            if (Array.isArray(nicheData)) {
+              return nicheData
+            }
+            return influencer.niche ? [influencer.niche] : []
+          } catch {
+            return influencer.niche ? [influencer.niche] : []
+          }
+        })(),
+        mainNiche: (() => {
+          try {
+            const nicheData = JSON.parse(influencer.niche || "[]")
+            if (typeof nicheData === "object" && nicheData !== null && nicheData.mainNiche) {
+              return nicheData.mainNiche
+            }
+            if (Array.isArray(nicheData) && nicheData.length > 0) {
+              return nicheData[0]
+            }
+            return influencer.niche || ""
+          } catch {
+            return influencer.niche || ""
+          }
+        })(),
         bio: influencer.bio || "",
         gender: influencer.gender || "OUTRO",
         followers: influencer.followers || "",
         reach: influencer.reach || "",
         engagement: influencer.engagement || "",
-        priceMin: influencer.priceMin || "",
+        views30Days: influencer.views30Days || "",
+        reach30Days: influencer.reach30Days || "",
+        averageReels: influencer.averageReels || "",
+        localAudience: influencer.localAudience || "",
         priceClient: influencer.priceClient || "",
         priceCopart: influencer.priceCopart || "",
-        priceVideo: influencer.priceVideo || "",
         priceRepost: influencer.priceRepost || "",
         restrictions: influencer.restrictions || "",
         status: influencer.status || "PUBLISHED",
@@ -228,16 +281,19 @@ export default function AdminDashboard() {
         tiktok: "",
         youtube: "",
         city: "",
-        niche: "",
+        niches: [],
+        mainNiche: "",
         bio: "",
         gender: "OUTRO",
         followers: "",
         reach: "",
         engagement: "",
-        priceMin: "",
+        views30Days: "",
+        reach30Days: "",
+        averageReels: "",
+        localAudience: "",
         priceClient: "",
         priceCopart: "",
-        priceVideo: "",
         priceRepost: "",
         restrictions: "",
         status: "PUBLISHED",
@@ -311,6 +367,21 @@ export default function AdminDashboard() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setFormMessage(null)
+    
+    // Validar nichos
+    if (formData.niches.length === 0) {
+      setFormMessage("Selecione pelo menos 1 nicho.")
+      return
+    }
+    if (formData.niches.length === 3 && !formData.mainNiche) {
+      setFormMessage("Selecione qual é o nicho principal.")
+      return
+    }
+    if (formData.mainNiche && !formData.niches.includes(formData.mainNiche)) {
+      setFormMessage("O nicho principal deve estar entre os nichos selecionados.")
+      return
+    }
+    
     setFormSubmitting(true)
 
     try {
@@ -332,12 +403,26 @@ export default function AdminDashboard() {
 
       const method = isEditing ? "PATCH" : "POST"
 
+      // Preparar dados de nicho no formato correto
+      const nicheData = formData.niches.length === 3
+        ? {
+            niches: formData.niches,
+            mainNiche: formData.mainNiche || formData.niches[0],
+          }
+        : formData.niches.length > 0
+        ? {
+            niches: formData.niches,
+            mainNiche: formData.mainNiche || formData.niches[0],
+          }
+        : { niches: [], mainNiche: "" }
+
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
           photo: photoUrl,
+          niche: JSON.stringify(nicheData),
           services: JSON.stringify(services),
           portfolio: JSON.stringify(portfolioItems),
           reviews: JSON.stringify(reviews),
@@ -440,11 +525,44 @@ export default function AdminDashboard() {
     const matchesSearch =
       inf.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       inf.city.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesNiche = selectedNiche === "all" || inf.niche === selectedNiche
+    // Verificar se o nicho selecionado está nos nichos do influenciador
+    let matchesNiche = true
+    if (selectedNiche !== "all") {
+      try {
+        const nicheData = JSON.parse(inf.niche || "[]")
+        if (typeof nicheData === "object" && nicheData !== null && nicheData.niches) {
+          matchesNiche = nicheData.niches.includes(selectedNiche)
+        } else if (Array.isArray(nicheData)) {
+          matchesNiche = nicheData.includes(selectedNiche)
+        } else {
+          matchesNiche = inf.niche === selectedNiche
+        }
+      } catch {
+        matchesNiche = inf.niche === selectedNiche
+      }
+    }
     return matchesSearch && matchesNiche
   })
 
-  const niches = ["all", ...new Set(influencers.map((inf) => inf.niche))]
+  // Extrair todos os nichos únicos dos influenciadores
+  const allNiches = new Set<string>()
+  influencers.forEach((inf) => {
+    try {
+      const nicheData = JSON.parse(inf.niche || "[]")
+      if (typeof nicheData === "object" && nicheData !== null && nicheData.niches) {
+        nicheData.niches.forEach((n: string) => allNiches.add(n))
+      } else if (Array.isArray(nicheData)) {
+        nicheData.forEach((n: string) => allNiches.add(n))
+      } else if (inf.niche) {
+        allNiches.add(inf.niche)
+      }
+    } catch {
+      if (inf.niche) {
+        allNiches.add(inf.niche)
+      }
+    }
+  })
+  const niches = ["all", ...Array.from(allNiches).sort()]
 
   if (isCheckingAuth) {
     return (
@@ -642,9 +760,43 @@ export default function AdminDashboard() {
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                            {influencer.niche}
-                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {(() => {
+                              try {
+                                const nicheData = JSON.parse(influencer.niche || "[]")
+                                if (typeof nicheData === "object" && nicheData !== null && nicheData.niches) {
+                                  // Formato novo: mostrar todos os nichos, com o principal destacado
+                                  return nicheData.niches.map((niche: string, idx: number) => (
+                                    <span
+                                      key={idx}
+                                      className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                                        niche === nicheData.mainNiche
+                                          ? "bg-purple-600/40 text-purple-200 border-purple-400/50 font-bold"
+                                          : "bg-purple-500/20 text-purple-300 border-purple-500/30"
+                                      }`}
+                                    >
+                                      {niche === nicheData.mainNiche ? `${niche} ⭐` : niche}
+                                    </span>
+                                  ))
+                                }
+                                if (Array.isArray(nicheData) && nicheData.length > 0) {
+                                  return nicheData.map((niche: string, idx: number) => (
+                                    <span
+                                      key={idx}
+                                      className="px-3 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                                    >
+                                      {niche}
+                                    </span>
+                                  ))
+                                }
+                              } catch {}
+                              return (
+                                <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                                  {influencer.niche}
+                                </span>
+                              )
+                            })()}
+                          </div>
                         </td>
                         <td className="py-4 px-4 text-gray-300">📍 {influencer.city}</td>
                         <td className="py-4 px-4 text-gray-300">{influencer.reach}</td>
@@ -853,25 +1005,85 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Nicho *</label>
-                      <select
-                        required
-                        value={formData.niche}
-                        onChange={(e) => setFormData({ ...formData, niche: e.target.value })}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                      >
-                        <option value="">Selecione</option>
-                        <option value="Beleza">Beleza</option>
-                        <option value="Moda">Moda</option>
-                        <option value="Fitness">Fitness</option>
-                        <option value="Alimentação">Alimentação</option>
-                        <option value="Humor">Humor</option>
-                        <option value="Agro">Agro</option>
-                        <option value="Música">Música</option>
-                        <option value="Tecnologia">Tecnologia</option>
-                        <option value="Entretenimento">Entretenimento</option>
-                      </select>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Nichos Principais (selecione 3) *
+                      </label>
+                      <div className="space-y-2 max-h-60 overflow-y-auto bg-white/5 border border-white/10 rounded-lg p-3">
+                        {availableNiches.map((niche) => (
+                          <label
+                            key={niche}
+                            className="flex items-center space-x-2 cursor-pointer hover:bg-white/5 p-2 rounded transition-colors"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.niches.includes(niche)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  if (formData.niches.length < 3) {
+                                    const newNiches = [...formData.niches, niche]
+                                    setFormData({ 
+                                      ...formData, 
+                                      niches: newNiches,
+                                      mainNiche: formData.mainNiche || (newNiches.length === 1 ? niche : formData.mainNiche)
+                                    })
+                                  }
+                                } else {
+                                  const newNiches = formData.niches.filter((n) => n !== niche)
+                                  setFormData({
+                                    ...formData,
+                                    niches: newNiches,
+                                    mainNiche: formData.mainNiche === niche ? "" : formData.mainNiche,
+                                  })
+                                }
+                              }}
+                              disabled={!formData.niches.includes(niche) && formData.niches.length >= 3}
+                              className="w-4 h-4 rounded border-white/20 bg-white/5 text-purple-600 focus:ring-purple-500 focus:ring-2"
+                            />
+                            <span className="text-sm text-gray-300">{niche}</span>
+                          </label>
+                        ))}
+                      </div>
+                      {formData.niches.length > 0 && (
+                        <p className="text-xs text-purple-300 mt-2">
+                          {formData.niches.length} de 3 nichos selecionados
+                        </p>
+                      )}
+                      {formData.niches.length === 0 && (
+                        <p className="text-xs text-gray-500 mt-2">Selecione 3 nichos principais</p>
+                      )}
+                      {formData.niches.length > 0 && formData.niches.length < 3 && (
+                        <p className="text-xs text-yellow-400 mt-2">Selecione mais {3 - formData.niches.length} nicho(s) para completar</p>
+                      )}
                     </div>
+                    {formData.niches.length === 3 && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Qual é o nicho principal? *
+                        </label>
+                        <div className="space-y-2">
+                          {formData.niches.map((niche) => (
+                            <label
+                              key={niche}
+                              className="flex items-center space-x-2 cursor-pointer hover:bg-white/5 p-3 rounded-lg border border-white/10 transition-colors bg-white/5"
+                            >
+                              <input
+                                type="radio"
+                                name="mainNiche"
+                                checked={formData.mainNiche === niche}
+                                onChange={() => setFormData({ ...formData, mainNiche: niche })}
+                                className="w-4 h-4 border-white/20 bg-white/5 text-purple-600 focus:ring-purple-500 focus:ring-2"
+                              />
+                              <span className={`text-sm font-medium ${formData.mainNiche === niche ? "text-purple-300" : "text-gray-300"}`}>
+                                {niche}
+                              </span>
+                              {formData.mainNiche === niche && (
+                                <span className="ml-auto text-xs text-purple-400 font-bold">PRINCIPAL</span>
+                              )}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">Gênero *</label>
                       <select
@@ -899,43 +1111,43 @@ export default function AdminDashboard() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Seguidores</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Vizualizações 30 dias</label>
                       <input
                         type="text"
-                        value={formData.followers}
-                        onChange={(e) => setFormData({ ...formData, followers: e.target.value })}
+                        value={formData.views30Days}
+                        onChange={(e) => setFormData({ ...formData, views30Days: e.target.value })}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                        placeholder="Ex: 50k, 100k"
+                        placeholder="Ex: 150k, 200k"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Alcance</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Alcance 30 dias</label>
                       <input
                         type="text"
-                        value={formData.reach}
-                        onChange={(e) => setFormData({ ...formData, reach: e.target.value })}
+                        value={formData.reach30Days}
+                        onChange={(e) => setFormData({ ...formData, reach30Days: e.target.value })}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                        placeholder="Ex: 200k"
+                        placeholder="Ex: 100k, 150k"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Engajamento</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Média por reels</label>
                       <input
                         type="text"
-                        value={formData.engagement}
-                        onChange={(e) => setFormData({ ...formData, engagement: e.target.value })}
+                        value={formData.averageReels}
+                        onChange={(e) => setFormData({ ...formData, averageReels: e.target.value })}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                        placeholder="Ex: 4,5%"
+                        placeholder="Ex: 10k, 15k"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Preço Mínimo</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Público local</label>
                       <input
                         type="text"
-                        value={formData.priceMin}
-                        onChange={(e) => setFormData({ ...formData, priceMin: e.target.value })}
+                        value={formData.localAudience}
+                        onChange={(e) => setFormData({ ...formData, localAudience: e.target.value })}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                        placeholder="Ex: R$ 150"
+                        placeholder="Ex: 60%, 70%"
                       />
                     </div>
                     <div>
@@ -956,16 +1168,6 @@ export default function AdminDashboard() {
                         onChange={(e) => setFormData({ ...formData, priceCopart: e.target.value })}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
                         placeholder="Ex: R$ 1.200,00"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Preço Vídeo</label>
-                      <input
-                        type="text"
-                        value={formData.priceVideo}
-                        onChange={(e) => setFormData({ ...formData, priceVideo: e.target.value })}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                        placeholder="Ex: R$ 300"
                       />
                     </div>
                     <div>

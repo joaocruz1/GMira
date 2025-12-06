@@ -38,6 +38,10 @@ model Influencer {
   followers      String?
   reach          String?
   engagement     String?
+  views30Days    String?           // Vizualizações 30 dias
+  reach30Days    String?           // Alcance 30 dias
+  averageReels   String?           // Média por reels
+  localAudience  String?           // Público local
   priceMin       String?           // ex: "R$ 150"
   priceClient    String?           // ex: "R$ 2.500,00"
   priceCopart    String?           // ex: "R$ 1.200,00"

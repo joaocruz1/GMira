@@ -9,7 +9,23 @@ import { Button } from "@/components/ui/button"
 import FadeIn from "@/components/ui/fade-in"
 import { Menu, X, ChevronDown, Lock } from "lucide-react"
 
-const niches = ["Todos", "Moda", "Tecnologia", "Entretenimento"]
+const niches = [
+  "Todos",
+  "Moda / Look / Lifestyle",
+  "Beleza / Maquiagem / Skincare",
+  "Fitness / Saúde / Bem-estar",
+  "Alimentação / Gastronomia",
+  "Moda Infantil / Maternidade",
+  "Música / Artista / Performance",
+  "Agro / Rural / Campo",
+  "Negócios / Empreendedorismo",
+  "Humor / Entretenimento",
+  "Pets / Animais",
+  "Relacionamentos / Vida pessoal",
+  "Educação / Estudos / Profissional",
+  "Esportes",
+  "Games / Tecnologia",
+]
 const cities = ["Todas", "São Paulo", "Rio de Janeiro", "Belo Horizonte"]
 
 function AnimatedCounter({ value, label, description }: { value: number; label: string; description?: string }) {
@@ -322,6 +338,10 @@ interface ApiInfluencer {
   followers?: string
   reach?: string
   engagement?: string
+  views30Days?: string
+  reach30Days?: string
+  averageReels?: string
+  localAudience?: string
   priceMin?: string
 }
 
@@ -339,10 +359,14 @@ export default function GMFacesCatalog() {
     email: "",
     phone: "",
     instagram: "",
-    niche: "",
+    niches: [] as string[],
+    mainNiche: "",
     city: "",
     followers: "",
-    engagement: "",
+    views30Days: "",
+    reach30Days: "",
+    averageReels: "",
+    localAudience: "",
     priceVideo: "",
     priceRepost: "",
     bio: "",
@@ -381,7 +405,29 @@ export default function GMFacesCatalog() {
 
   const filteredInfluencers = influencers.filter((influencer) => {
     const matchesSearch = influencer.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesNiche = selectedNiche === "Todos" || influencer.niche === selectedNiche
+    
+    // Verificar se o nicho selecionado está nos nichos do influenciador
+    let matchesNiche = true
+    if (selectedNiche !== "Todos") {
+      try {
+        // Tentar parsear como JSON (objeto com niches e mainNiche ou array)
+        const nicheData = JSON.parse(influencer.niche || "[]")
+        if (typeof nicheData === "object" && nicheData !== null && nicheData.niches) {
+          // Formato novo: { niches: [...], mainNiche: "..." }
+          matchesNiche = nicheData.niches.includes(selectedNiche)
+        } else if (Array.isArray(nicheData)) {
+          // Formato antigo: array de nichos
+          matchesNiche = nicheData.includes(selectedNiche)
+        } else {
+          // Fallback para string única (compatibilidade com dados antigos)
+          matchesNiche = influencer.niche === selectedNiche
+        }
+      } catch {
+        // Se não for JSON, tratar como string única
+        matchesNiche = influencer.niche === selectedNiche
+      }
+    }
+    
     const matchesCity = selectedCity === "Todas" || influencer.city === selectedCity
     const matchesGender = selectedGender === "Todos" || influencer.gender === selectedGender
 
@@ -605,17 +651,41 @@ export default function GMFacesCatalog() {
                         </div>
                       )}
 
-                      {/* Badge da categoria */}
+                      {/* Badge da categoria - Nicho Principal */}
                       <div className="absolute top-3 right-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg backdrop-blur-sm border border-purple-400/30 z-20">
-                        {influencer.niche}
+                        {(() => {
+                          try {
+                            const nicheData = JSON.parse(influencer.niche || "[]")
+                            if (typeof nicheData === "object" && nicheData !== null && nicheData.mainNiche) {
+                              return nicheData.mainNiche
+                            }
+                            if (Array.isArray(nicheData) && nicheData.length > 0) {
+                              return nicheData[0]
+                            }
+                            return influencer.niche
+                          } catch {
+                            return influencer.niche
+                          }
+                        })()}
                       </div>
                     </div>
 
                     <CardHeader className="pb-4">
-                      {/* Nome da categoria */}
+                      {/* Nome da categoria - Nicho Principal */}
                       <div className="mb-3">
                         <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">
-                          {influencer.niche.toUpperCase()}
+                          {(() => {
+                            try {
+                              const nicheData = JSON.parse(influencer.niche || "[]")
+                              if (typeof nicheData === "object" && nicheData !== null && nicheData.mainNiche) {
+                                return nicheData.mainNiche.toUpperCase()
+                              }
+                              if (Array.isArray(nicheData) && nicheData.length > 0) {
+                                return nicheData[0].toUpperCase()
+                              }
+                            } catch {}
+                            return influencer.niche.toUpperCase()
+                          })()}
                         </p>
                       </div>
 
@@ -636,22 +706,19 @@ export default function GMFacesCatalog() {
                     </CardHeader>
 
                     <CardContent className="flex-grow pb-4 space-y-3">
-                      {/* Engajamento */}
+                      {/* Média por reels */}
                       <div className="flex items-center gap-2 text-sm">
-                        <span className="text-lg">📈</span>
                         <span className="text-gray-300">
-                          <span className="font-semibold text-white">Engajamento médio:</span>{" "}
-                          {influencer.engagement ?? "—"}
+                          <span className="font-semibold text-white">Média por reels:</span>{" "}
+                          {influencer.averageReels || "—"}
                         </span>
                       </div>
 
-                      {/* Faixa de preço */}
+                      {/* Valor mínimo por campanha */}
                       <div className="flex items-center gap-2 text-sm">
-                        <span className="text-lg">💰</span>
                         <span className="text-gray-300">
-                          <span className="font-semibold text-white">Cachê a partir de</span>{" "}
-                          {influencer.priceMin ?? "Sob consulta"}{" "}
-                          <span className="text-gray-400">por vídeo</span>
+                          <span className="font-semibold text-white">Valor mínimo por campanha:</span>{" "}
+                          {influencer.priceMin || influencer.priceClient || "Sob consulta"}
                         </span>
                       </div>
                     </CardContent>
@@ -1116,13 +1183,35 @@ export default function GMFacesCatalog() {
                 <form
                   onSubmit={async (e) => {
                     e.preventDefault()
+                    if (formData.niches.length === 0) {
+                      setFormMessage("Selecione 3 nichos principais.")
+                      return
+                    }
+                    if (formData.niches.length < 3) {
+                      setFormMessage("Selecione exatamente 3 nichos principais.")
+                      return
+                    }
+                    if (!formData.mainNiche) {
+                      setFormMessage("Selecione qual é o nicho principal.")
+                      return
+                    }
+                    if (!formData.niches.includes(formData.mainNiche)) {
+                      setFormMessage("O nicho principal deve estar entre os 3 nichos selecionados.")
+                      return
+                    }
                     setFormMessage(null)
                     setFormSubmitting(true)
                     try {
                       const res = await fetch("/api/gmfaces/applications", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(formData),
+                        body: JSON.stringify({
+                          ...formData,
+                          niche: JSON.stringify({
+                            niches: formData.niches,
+                            mainNiche: formData.mainNiche,
+                          }),
+                        }),
                       })
                       const data = await res.json()
                       if (!res.ok) {
@@ -1134,10 +1223,14 @@ export default function GMFacesCatalog() {
                         email: "",
                         phone: "",
                         instagram: "",
-                        niche: "",
+                        niches: [],
+                        mainNiche: "",
                         city: "",
                         followers: "",
-                        engagement: "",
+                        views30Days: "",
+                        reach30Days: "",
+                        averageReels: "",
+                        localAudience: "",
                         priceVideo: "",
                         priceRepost: "",
                         bio: "",
@@ -1198,25 +1291,87 @@ export default function GMFacesCatalog() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Nicho *</label>
-                      <select
-                        required
-                        value={formData.niche}
-                        onChange={(e) => setFormData({ ...formData, niche: e.target.value })}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                      >
-                        <option value="">Selecione</option>
-                        <option value="Beleza">Beleza</option>
-                        <option value="Moda">Moda</option>
-                        <option value="Fitness">Fitness</option>
-                        <option value="Alimentação">Alimentação</option>
-                        <option value="Humor">Humor</option>
-                        <option value="Agro">Agro</option>
-                        <option value="Música">Música</option>
-                        <option value="Tecnologia">Tecnologia</option>
-                        <option value="Entretenimento">Entretenimento</option>
-                      </select>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Nichos Principais (selecione 3) *
+                      </label>
+                      <div className="space-y-2 max-h-60 overflow-y-auto bg-white/5 border border-white/10 rounded-lg p-3">
+                        {niches
+                          .filter((niche) => niche !== "Todos")
+                          .map((niche) => (
+                            <label
+                              key={niche}
+                              className="flex items-center space-x-2 cursor-pointer hover:bg-white/5 p-2 rounded transition-colors"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={formData.niches.includes(niche)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    if (formData.niches.length < 3) {
+                                      const newNiches = [...formData.niches, niche]
+                                      setFormData({ 
+                                        ...formData, 
+                                        niches: newNiches,
+                                        mainNiche: formData.mainNiche || (newNiches.length === 1 ? niche : formData.mainNiche)
+                                      })
+                                    }
+                                  } else {
+                                    const newNiches = formData.niches.filter((n) => n !== niche)
+                                    setFormData({
+                                      ...formData,
+                                      niches: newNiches,
+                                      mainNiche: formData.mainNiche === niche ? "" : formData.mainNiche,
+                                    })
+                                  }
+                                }}
+                                disabled={!formData.niches.includes(niche) && formData.niches.length >= 3}
+                                className="w-4 h-4 rounded border-white/20 bg-white/5 text-purple-600 focus:ring-purple-500 focus:ring-2"
+                              />
+                              <span className="text-sm text-gray-300">{niche}</span>
+                            </label>
+                          ))}
+                      </div>
+                      {formData.niches.length > 0 && (
+                        <p className="text-xs text-purple-300 mt-2">
+                          {formData.niches.length} de 3 nichos selecionados
+                        </p>
+                      )}
+                      {formData.niches.length === 0 && (
+                        <p className="text-xs text-gray-500 mt-2">Selecione 3 nichos principais</p>
+                      )}
+                      {formData.niches.length > 0 && formData.niches.length < 3 && (
+                        <p className="text-xs text-yellow-400 mt-2">Selecione mais {3 - formData.niches.length} nicho(s) para completar</p>
+                      )}
                     </div>
+                    {formData.niches.length === 3 && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Qual é o nicho principal? *
+                        </label>
+                        <div className="space-y-2">
+                          {formData.niches.map((niche) => (
+                            <label
+                              key={niche}
+                              className="flex items-center space-x-2 cursor-pointer hover:bg-white/5 p-3 rounded-lg border border-white/10 transition-colors bg-white/5"
+                            >
+                              <input
+                                type="radio"
+                                name="mainNiche"
+                                checked={formData.mainNiche === niche}
+                                onChange={() => setFormData({ ...formData, mainNiche: niche })}
+                                className="w-4 h-4 border-white/20 bg-white/5 text-purple-600 focus:ring-purple-500 focus:ring-2"
+                              />
+                              <span className={`text-sm font-medium ${formData.mainNiche === niche ? "text-purple-300" : "text-gray-300"}`}>
+                                {niche}
+                              </span>
+                              {formData.mainNiche === niche && (
+                                <span className="ml-auto text-xs text-purple-400 font-bold">PRINCIPAL</span>
+                              )}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">Cidade *</label>
                       <input
@@ -1229,7 +1384,7 @@ export default function GMFacesCatalog() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Número de seguidores</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Seguidores</label>
                       <input
                         type="text"
                         value={formData.followers}
@@ -1239,13 +1394,43 @@ export default function GMFacesCatalog() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Engajamento médio</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Vizualizações 30 dias</label>
                       <input
                         type="text"
-                        value={formData.engagement}
-                        onChange={(e) => setFormData({ ...formData, engagement: e.target.value })}
+                        value={formData.views30Days}
+                        onChange={(e) => setFormData({ ...formData, views30Days: e.target.value })}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                        placeholder="Ex: 4,5%"
+                        placeholder="Ex: 150k, 200k"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Alcance 30 dias</label>
+                      <input
+                        type="text"
+                        value={formData.reach30Days}
+                        onChange={(e) => setFormData({ ...formData, reach30Days: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                        placeholder="Ex: 100k, 150k"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Média por reels</label>
+                      <input
+                        type="text"
+                        value={formData.averageReels}
+                        onChange={(e) => setFormData({ ...formData, averageReels: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                        placeholder="Ex: 10k, 15k"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Público local</label>
+                      <input
+                        type="text"
+                        value={formData.localAudience}
+                        onChange={(e) => setFormData({ ...formData, localAudience: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                        placeholder="Ex: 60%, 70%"
                       />
                     </div>
                     <div>
