@@ -1085,17 +1085,6 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Engagement % *</label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.engagement}
-                        onChange={(e) => setFormData({ ...formData, engagement: e.target.value })}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                        placeholder="Ex: 38.1%, 5.2%, 6.1%"
-                      />
-                    </div>
-                    <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">Vizualizações 30 dias</label>
                       <input
                         type="text"
