@@ -287,9 +287,9 @@ export default function InfluencerProfile({ params }: Props) {
       <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-20">
         <div className="grid grid-cols-3 gap-4 -mt-20 mb-12 relative z-30">
           <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-4 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300 group/card flex flex-col">
-            <div className="flex items-center gap-3 mb-2">
-              <TrendingUp className="w-5 h-5 text-purple-400" />
-              <p className="text-xs text-gray-400 uppercase tracking-wider">
+            <div className="flex items-center gap-2 md:gap-3 mb-2">
+              <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-purple-400" />
+              <p className="text-[10px] md:text-xs text-gray-400 uppercase tracking-wider">
                 Nicho{(() => {
                   try {
                     const nicheData = JSON.parse(influencer.niche || "[]")
@@ -315,7 +315,7 @@ export default function InfluencerProfile({ params }: Props) {
                     return (
                       <>
                         {/* Nicho Principal - Grande */}
-                        <p className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-1">
+                        <p className="text-lg md:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-1">
                           {mainNiche}
                         </p>
                         {/* Outros Nichos - Pequenos */}
@@ -337,14 +337,14 @@ export default function InfluencerProfile({ params }: Props) {
                   }
                   if (Array.isArray(nicheData) && nicheData.length > 0) {
                     return (
-                      <p className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                      <p className="text-lg md:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
                         {nicheData[0]}
                       </p>
                     )
                   }
                 } catch {}
                 return (
-                  <p className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                  <p className="text-lg md:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
                     {influencer.niche}
                   </p>
                 )
@@ -353,19 +353,19 @@ export default function InfluencerProfile({ params }: Props) {
           </div>
 
           <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-4 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300 group/card">
-            <div className="flex items-center gap-3 mb-2">
-              <Users className="w-5 h-5 text-pink-400" />
-              <p className="text-xs text-gray-400 uppercase tracking-wider">Localização</p>
+            <div className="flex items-center gap-2 md:gap-3 mb-2">
+              <Users className="w-4 h-4 md:w-5 md:h-5 text-pink-400" />
+              <p className="text-[10px] md:text-xs text-gray-400 uppercase tracking-wider">Localização</p>
             </div>
-            <p className="text-xl font-bold text-white">{influencer.city}</p>
+            <p className="text-lg md:text-xl font-bold text-white">{influencer.city}</p>
           </div>
 
           <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-4 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300 group/card">
-            <div className="flex items-center gap-3 mb-2">
-              <Eye className="w-5 h-5 text-purple-400" />
-              <p className="text-xs text-gray-400 uppercase tracking-wider">Gênero</p>
+            <div className="flex items-center gap-2 md:gap-3 mb-2">
+              <Eye className="w-4 h-4 md:w-5 md:h-5 text-purple-400" />
+              <p className="text-[10px] md:text-xs text-gray-400 uppercase tracking-wider">Gênero</p>
             </div>
-            <p className="text-xl font-bold text-white">{influencer.gender}</p>
+            <p className="text-lg md:text-xl font-bold text-white">{influencer.gender}</p>
           </div>
         </div>
 
@@ -455,8 +455,8 @@ export default function InfluencerProfile({ params }: Props) {
             )}
 
             {/* Métricas Adicionais (30 dias, reels, etc) */}
-            {(influencer.views30Days || influencer.reach30Days || influencer.averageReels || influencer.localAudience) && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {(influencer.views30Days || influencer.reach30Days || influencer.averageReels) && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {influencer.views30Days && (
                   <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
                     <div className="group">
@@ -487,16 +487,91 @@ export default function InfluencerProfile({ params }: Props) {
                     </div>
                   </div>
                 )}
-                {influencer.localAudience && (
-                  <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-                    <div className="group">
-                      <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-                        {influencer.localAudience}
-                      </div>
-                      <p className="text-sm text-gray-400 mt-2">Público local</p>
-                    </div>
+              </div>
+            )}
+
+            {/* Público Local - Card Separado */}
+            {influencer.localAudience && (
+              <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
+                <div className="group">
+                  <p className="text-sm font-semibold text-gray-200 mb-4 uppercase tracking-wider">Principais cidades</p>
+                  <div className="space-y-3">
+                    {(() => {
+                      try {
+                        // Parsear diferentes formatos:
+                        // "49,9% Ouro Fino, 2,5% Inconfidentes" (porcentagem primeiro)
+                        // "Ouro Fino: 49,9%, Inconfidentes: 2,5%" (cidade primeiro com dois pontos)
+                        // "Ouro Fino 49,9%, Inconfidentes 2,5%" (cidade primeiro sem dois pontos)
+                        
+                        const text = influencer.localAudience.trim()
+                        const parts = text.split(',').map(p => p.trim()).filter(p => p.length > 0)
+                        
+                        const cities: Array<{ city: string; percentage: number }> = []
+                        
+                        for (const part of parts) {
+                          let city = ''
+                          let percentage = 0
+                          
+                          // Padrão 1: "49,9% Ouro Fino" ou "49.9% Ouro Fino" (porcentagem primeiro) - PRIORIDADE
+                          let match = part.match(/^([\d,.]+)%\s+(.+)$/i)
+                          if (match) {
+                            const percStr = match[1].replace(',', '.')
+                            percentage = parseFloat(percStr)
+                            city = match[2].trim()
+                          } else {
+                            // Padrão 2: "Ouro Fino: 49,9%" (cidade primeiro com dois pontos)
+                            match = part.match(/^(.+?):\s*([\d,.]+)%$/i)
+                            if (match) {
+                              city = match[1].trim()
+                              const percStr = match[2].replace(',', '.')
+                              percentage = parseFloat(percStr)
+                            } else {
+                              // Padrão 3: "Ouro Fino 49,9%" (cidade primeiro sem dois pontos)
+                              match = part.match(/^(.+?)\s+([\d,.]+)%$/i)
+                              if (match) {
+                                city = match[1].trim()
+                                const percStr = match[2].replace(',', '.')
+                                percentage = parseFloat(percStr)
+                              }
+                            }
+                          }
+                          
+                          if (city && !isNaN(percentage) && percentage > 0) {
+                            cities.push({ city, percentage })
+                          }
+                        }
+                        
+                        // Ordenar por porcentagem (maior primeiro)
+                        cities.sort((a, b) => b.percentage - a.percentage)
+
+                        if (cities.length > 0) {
+                          return cities.map((item, idx) => (
+                            <div key={idx} className="space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-300 font-medium">{item.city}</span>
+                                <span className="text-sm font-semibold text-purple-400">{item.percentage.toFixed(1).replace('.', ',')}%</span>
+                              </div>
+                              <div className="w-full bg-white/5 rounded-full h-2.5 overflow-hidden">
+                                <div
+                                  className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-700 ease-out"
+                                  style={{ width: `${item.percentage}%` }}
+                                />
+                              </div>
+                            </div>
+                          ))
+                        }
+                      } catch (error) {
+                        console.error("Erro ao parsear público local:", error)
+                      }
+                      // Fallback: exibir como texto simples
+                      return (
+                        <div className="text-sm text-gray-300">
+                          {influencer.localAudience}
+                        </div>
+                      )
+                    })()}
                   </div>
-                )}
+                </div>
               </div>
             )}
 

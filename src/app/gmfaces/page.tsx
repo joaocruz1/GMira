@@ -26,7 +26,17 @@ const niches = [
   "Esportes",
   "Games / Tecnologia",
 ]
-const cities = ["Todas", "São Paulo", "Rio de Janeiro", "Belo Horizonte"]
+const cities = [
+  "Todas",
+  "Ouro Fino",
+  "Inconfidentes",
+  "Borda da Mata",
+  "Pouso Alegre",
+  "Bueno Brandão",
+  "Alfenas",
+  "Monte Sião",
+  "Jacutinga",
+]
 
 function AnimatedCounter({ value, label, description }: { value: number; label: string; description?: string }) {
   const [displayValue, setDisplayValue] = useState(0)

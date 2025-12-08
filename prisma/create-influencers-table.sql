@@ -87,3 +87,4 @@ BEGIN
     RAISE NOTICE 'Trigger para updatedAt configurado.';
 END $$;
 
+
