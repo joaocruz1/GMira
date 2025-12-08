@@ -286,7 +286,7 @@ export default function InfluencerProfile({ params }: Props) {
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-20">
         <div className="grid grid-cols-3 gap-4 -mt-20 mb-12 relative z-30">
-          <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-4 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300 group/card">
+          <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-4 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300 group/card flex flex-col">
             <div className="flex items-center gap-3 mb-2">
               <TrendingUp className="w-5 h-5 text-purple-400" />
               <p className="text-xs text-gray-400 uppercase tracking-wider">
@@ -304,38 +304,52 @@ export default function InfluencerProfile({ params }: Props) {
                 })()}
               </p>
             </div>
-            <p className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+            <div className="flex-1 flex flex-col justify-center">
               {(() => {
                 try {
                   const nicheData = JSON.parse(influencer.niche || "[]")
-                  if (typeof nicheData === "object" && nicheData !== null && nicheData.niches) {
-                    // Formato novo: mostrar todos os nichos, com o principal primeiro
-                    const allNiches = [...nicheData.niches]
-                    const mainIndex = allNiches.indexOf(nicheData.mainNiche)
-                    if (mainIndex > 0) {
-                      allNiches.splice(mainIndex, 1)
-                      allNiches.unshift(nicheData.mainNiche)
-                    }
-                    return allNiches.join(" • ")
+                  if (typeof nicheData === "object" && nicheData !== null && nicheData.niches && nicheData.mainNiche) {
+                    const mainNiche = nicheData.mainNiche
+                    const otherNiches = nicheData.niches.filter((n: string) => n !== mainNiche)
+                    
+                    return (
+                      <>
+                        {/* Nicho Principal - Grande */}
+                        <p className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-1">
+                          {mainNiche}
+                        </p>
+                        {/* Outros Nichos - Pequenos */}
+                        {otherNiches.length > 0 && (
+                          <div className="flex flex-wrap gap-x-1.5 gap-y-0.5 mt-1.5">
+                            {otherNiches.map((niche: string, idx: number) => (
+                              <span
+                                key={idx}
+                                className="text-[9px] text-gray-500 font-normal opacity-60 leading-tight"
+                              >
+                                {niche}
+                                {idx < otherNiches.length - 1 && <span className="mx-1 text-gray-600">•</span>}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )
                   }
                   if (Array.isArray(nicheData) && nicheData.length > 0) {
-                    return nicheData.join(" • ")
+                    return (
+                      <p className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                        {nicheData[0]}
+                      </p>
+                    )
                   }
                 } catch {}
-                return influencer.niche
+                return (
+                  <p className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                    {influencer.niche}
+                  </p>
+                )
               })()}
-            </p>
-            <p className="text-xs text-purple-400 mt-1 font-semibold">
-              {(() => {
-                try {
-                  const nicheData = JSON.parse(influencer.niche || "[]")
-                  if (typeof nicheData === "object" && nicheData !== null && nicheData.mainNiche) {
-                    return `Principal: ${nicheData.mainNiche}`
-                  }
-                } catch {}
-                return ""
-              })()}
-            </p>
+            </div>
           </div>
 
           <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-4 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300 group/card">

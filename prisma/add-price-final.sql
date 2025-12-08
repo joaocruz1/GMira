@@ -28,3 +28,4 @@ WHERE "priceFinal" IS NULL
   AND "priceClient" IS NOT NULL;
 */
 
+
