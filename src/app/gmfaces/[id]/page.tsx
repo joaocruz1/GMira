@@ -127,6 +127,7 @@ interface ApiInfluencer {
   priceCopart?: string
   priceVideo?: string
   priceRepost?: string
+  priceFinal?: string
   restrictions?: string
   services?: string
   portfolio?: string
@@ -267,7 +268,7 @@ export default function InfluencerProfile({ params }: Props) {
           {influencer.status === "PUBLISHED" ? (
             <>
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-gray-300">Disponível para colaborações</span>
+              <span className="text-sm text-gray-300"></span>
             </>
           ) : influencer.status === "PENDING" ? (
             <>
@@ -354,13 +355,64 @@ export default function InfluencerProfile({ params }: Props) {
           </div>
         </div>
 
+        {/* Métricas Principais - Sempre visíveis */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+          {/* Seguidores */}
+          <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
+            <div className="group">
+              {followersCount > 0 ? (
+                <AnimatedCount target={followersCount} label="Seguidores" />
+              ) : (
+                <>
+                  <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                    {influencer.followers || "—"}
+                  </div>
+                  <p className="text-sm text-gray-400 mt-2">Seguidores</p>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Alcance Médio */}
+          <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
+            <div className="group">
+              {reachCount > 0 ? (
+                <AnimatedCount target={reachCount} label="Alcance Médio" />
+              ) : (
+                <>
+                  <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                    {influencer.reach || "—"}
+                  </div>
+                  <p className="text-sm text-gray-400 mt-2">Alcance Médio</p>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Engagement */}
+          <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
+            <div className="group">
+              {engagementValue > 0 ? (
+                <AnimatedCount target={engagementValue} label="Engajamento %" />
+              ) : (
+                <>
+                  <div className="text-4xl font-bold text-transparent bg-clip-text bg-gsaoradient-to-r from-purple-400 to-pink-500">
+                    {influencer.engagement || "—"}
+                  </div>
+                  <p className="text-sm text-gray-400 mt-2">Engajamento %</p>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           {/* Left Column */}
           <div className="space-y-6">
             <Card className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border-white/10 hover:border-purple-500/50 transition-all duration-300 overflow-hidden group">
               <div className="h-1 bg-gradient-to-r from-purple-500 to-pink-500 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-all duration-300"></div>
               <CardHeader>
-                <CardTitle className="text-lg">Sobre</CardTitle>
+                <CardTitle className="text-white text-lg">Sobre</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-300 leading-relaxed text-sm">{influencer.bio}</p>
@@ -419,91 +471,53 @@ export default function InfluencerProfile({ params }: Props) {
             </div>
           </div>
 
-          {/* Right Column - Stats */}
+          {/* Right Column - Stats Adicionais */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {influencer.views30Days && (
-                <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-                  <div className="group">
-                    <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-                      {influencer.views30Days}
-                    </div>
-                    <p className="text-sm text-gray-400 mt-2">Vizualizações 30 dias</p>
-                  </div>
-                </div>
-              )}
-              {influencer.reach30Days && (
-                <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-                  <div className="group">
-                    <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-                      {influencer.reach30Days}
-                    </div>
-                    <p className="text-sm text-gray-400 mt-2">Alcance 30 dias</p>
-                  </div>
-                </div>
-              )}
-              {influencer.averageReels && (
-                <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-                  <div className="group">
-                    <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-                      {influencer.averageReels}
-                    </div>
-                    <p className="text-sm text-gray-400 mt-2">Média por reels</p>
-                  </div>
-                </div>
-              )}
-              {influencer.localAudience && (
-                <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-                  <div className="group">
-                    <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-                      {influencer.localAudience}
-                    </div>
-                    <p className="text-sm text-gray-400 mt-2">Público local</p>
-                  </div>
-                </div>
-              )}
-              {/* Fallback para métricas antigas se novos campos não existirem */}
-              {!influencer.views30Days && !influencer.reach30Days && !influencer.averageReels && !influencer.localAudience && (
-                <>
+            {/* Métricas Adicionais (30 dias, reels, etc) */}
+            {(influencer.views30Days || influencer.reach30Days || influencer.averageReels || influencer.localAudience) && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {influencer.views30Days && (
                   <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-                    {followersCount > 0 ? (
-                      <AnimatedCount target={followersCount} label="Seguidores" />
-                    ) : (
-                      <div className="group">
-                        <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-                          {influencer.followers || "—"}
-                        </div>
-                        <p className="text-sm text-gray-400 mt-2">Seguidores</p>
+                    <div className="group">
+                      <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                        {influencer.views30Days}
                       </div>
-                    )}
+                      <p className="text-sm text-gray-400 mt-2">Vizualizações 30 dias</p>
+                    </div>
                   </div>
+                )}
+                {influencer.reach30Days && (
                   <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-                    {reachCount > 0 ? (
-                      <AnimatedCount target={reachCount} label="Alcance Médio" />
-                    ) : (
-                      <div className="group">
-                        <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-                          {influencer.reach || "—"}
-                        </div>
-                        <p className="text-sm text-gray-400 mt-2">Alcance Médio</p>
+                    <div className="group">
+                      <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                        {influencer.reach30Days}
                       </div>
-                    )}
+                      <p className="text-sm text-gray-400 mt-2">Alcance 30 dias</p>
+                    </div>
                   </div>
+                )}
+                {influencer.averageReels && (
                   <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-                    {engagementValue > 0 ? (
-                      <AnimatedCount target={engagementValue} label="Engagement %" />
-                    ) : (
-                      <div className="group">
-                        <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-                          {influencer.engagement || "—"}
-                        </div>
-                        <p className="text-sm text-gray-400 mt-2">Engagement %</p>
+                    <div className="group">
+                      <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                        {influencer.averageReels}
                       </div>
-                    )}
+                      <p className="text-sm text-gray-400 mt-2">Média por reels</p>
+                    </div>
                   </div>
-                </>
-              )}
-            </div>
+                )}
+                {influencer.localAudience && (
+                  <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
+                    <div className="group">
+                      <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                        {influencer.localAudience}
+                      </div>
+                      <p className="text-sm text-gray-400 mt-2">Público local</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur border-white/20 hover:border-purple-500/50 transition-all duration-300">
               <CardHeader>
@@ -582,25 +596,38 @@ export default function InfluencerProfile({ params }: Props) {
                 <CardTitle className="text-xl">Avaliações</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {(influencer.priceClient || influencer.priceCopart) && (
+                {(influencer.priceVideo || influencer.priceCopart || influencer.priceFinal) && (
                   <div className="border border-purple-500/30 rounded-lg p-4 bg-purple-500/5">
                     <div className="space-y-3">
-                      {influencer.priceClient && (
+                      {influencer.priceVideo && (
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-300">Para Cliente Final</span>
+                          <span className="text-gray-300">Cachê de Vídeo</span>
                           <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-                            {influencer.priceClient}
+                            {influencer.priceVideo}
                           </span>
                         </div>
                       )}
                       {influencer.priceCopart && (
                         <>
-                          {influencer.priceClient && (
+                          {influencer.priceVideo && (
                             <div className="h-px bg-gradient-to-r from-purple-500/30 to-pink-500/30"></div>
                           )}
                           <div className="flex justify-between items-center">
-                            <span className="text-gray-300">Coparticipação</span>
+                            <span className="text-gray-300">Cachê de Coparticipação</span>
                             <span className="text-xl font-bold text-purple-400">{influencer.priceCopart}</span>
+                          </div>
+                        </>
+                      )}
+                      {influencer.priceFinal && (
+                        <>
+                          {(influencer.priceVideo || influencer.priceCopart) && (
+                            <div className="h-px bg-gradient-to-r from-purple-500/30 to-pink-500/30"></div>
+                          )}
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-300 font-semibold">Preço Final</span>
+                            <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
+                              {influencer.priceFinal}
+                            </span>
                           </div>
                         </>
                       )}
@@ -609,9 +636,9 @@ export default function InfluencerProfile({ params }: Props) {
                 )}
                 <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-lg p-4 border border-slate-700/50">
                   <div className="mb-2">
-                    <p className="text-sm font-semibold text-gray-300 mb-1">Preço Mínimo por Campanha</p>
+                    <p className="text-sm font-semibold text-gray-300 mb-1">Preço Final</p>
                     <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-                      A partir de {influencer.priceClient || influencer.priceCopart || "R$ 300"}
+                      {influencer.priceFinal || influencer.priceClient || influencer.priceCopart || "Sob consulta"}
                     </p>
                   </div>
                   <p className="text-xs text-gray-400 mt-3 leading-relaxed">

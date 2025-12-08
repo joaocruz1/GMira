@@ -107,3 +107,4 @@ END $$;
 -- Verificar resultado
 SELECT 'Script executado com sucesso! Todas as colunas foram adicionadas e nichos migrados.' as resultado;
 
+

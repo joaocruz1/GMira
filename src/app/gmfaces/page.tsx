@@ -343,6 +343,8 @@ interface ApiInfluencer {
   averageReels?: string
   localAudience?: string
   priceMin?: string
+  priceClient?: string
+  priceFinal?: string
 }
 
 export default function GMFacesCatalog() {
@@ -368,7 +370,8 @@ export default function GMFacesCatalog() {
     averageReels: "",
     localAudience: "",
     priceVideo: "",
-    priceRepost: "",
+    priceCopart: "",
+    priceFinal: "",
     bio: "",
   })
   const [influencers, setInfluencers] = useState<ApiInfluencer[]>([])
@@ -517,7 +520,7 @@ export default function GMFacesCatalog() {
               {/* Stats section with animated counters */}
               <div className="grid grid-cols-3 gap-6 md:gap-12 pt-12 md:pt-20 border-t border-white/10">
                 <AnimatedCounter
-                  value={150}
+                  value={10}
                   label="Criadores Pré-Selecionados"
                   description="Influenciadores reais prontos para representar sua marca."
                 />
@@ -706,6 +709,16 @@ export default function GMFacesCatalog() {
                     </CardHeader>
 
                     <CardContent className="flex-grow pb-4 space-y-3">
+                      {/* Seguidores */}
+                      {influencer.followers && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-gray-300">
+                            <span className="font-semibold text-white">Seguidores:</span>{" "}
+                            {influencer.followers}
+                          </span>
+                        </div>
+                      )}
+
                       {/* Média por reels */}
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-gray-300">
@@ -714,11 +727,11 @@ export default function GMFacesCatalog() {
                         </span>
                       </div>
 
-                      {/* Valor mínimo por campanha */}
+                      {/* Preço final */}
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-gray-300">
-                          <span className="font-semibold text-white">Valor mínimo por campanha:</span>{" "}
-                          {influencer.priceMin || influencer.priceClient || "Sob consulta"}
+                          <span className="font-semibold text-white">Preço final:</span>{" "}
+                          {influencer.priceFinal || influencer.priceClient || "Sob consulta"}
                         </span>
                       </div>
                     </CardContent>
@@ -1232,7 +1245,8 @@ export default function GMFacesCatalog() {
                         averageReels: "",
                         localAudience: "",
                         priceVideo: "",
-                        priceRepost: "",
+                        priceCopart: "",
+                        priceFinal: "",
                         bio: "",
                       })
                       setIsFormOpen(false)
@@ -1434,24 +1448,38 @@ export default function GMFacesCatalog() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Cachê por vídeo (R$)</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Cachê de Vídeo (R$) *</label>
                       <input
                         type="text"
+                        required
                         value={formData.priceVideo}
                         onChange={(e) => setFormData({ ...formData, priceVideo: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                        placeholder="Ex: 300"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Cachê de Coparticipação (R$) *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.priceCopart}
+                        onChange={(e) => setFormData({ ...formData, priceCopart: e.target.value })}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
                         placeholder="Ex: 150"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Valor para repostar (R$)</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Preço Final (R$) *</label>
                       <input
                         type="text"
-                        value={formData.priceRepost}
-                        onChange={(e) => setFormData({ ...formData, priceRepost: e.target.value })}
+                        required
+                        value={formData.priceFinal}
+                        onChange={(e) => setFormData({ ...formData, priceFinal: e.target.value })}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                        placeholder="Ex: 50"
+                        placeholder="Ex: 400"
                       />
+                      <p className="text-xs text-purple-300 mt-1">Este é o preço que será usado</p>
                     </div>
                   </div>
                   <div>

@@ -35,11 +35,19 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
   const { id } = context.params
 
   try {
-    const data = await req.json()
+    const body = await req.json()
+    
+    // Filtrar apenas os campos válidos do schema do Prisma
+    // Remover campos que não existem no schema (niches, mainNiche)
+    const {
+      niches,
+      mainNiche,
+      ...validData
+    } = body
 
     const influencer = await prisma.influencer.update({
       where: { id },
-      data,
+      data: validData,
     })
 
     return NextResponse.json(influencer)

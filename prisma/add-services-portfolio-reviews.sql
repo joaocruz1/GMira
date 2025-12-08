@@ -14,3 +14,4 @@ WHERE table_name = 'Influencer'
 AND column_name IN ('services', 'portfolio', 'reviews');
 
 
+

@@ -45,8 +45,9 @@ model Influencer {
   priceMin       String?           // ex: "R$ 150"
   priceClient    String?           // ex: "R$ 2.500,00"
   priceCopart    String?           // ex: "R$ 1.200,00"
-  priceVideo     String?           // valor informado no formulário
+  priceVideo     String?           // Cachê de vídeo
   priceRepost    String?           // valor informado no formulário
+  priceFinal     String?           // Preço final (esse preço final é o que vamos usar)
   restrictions   String?
   services       String?           // JSON array de serviços
   portfolio      String?           // JSON array de itens do portfolio

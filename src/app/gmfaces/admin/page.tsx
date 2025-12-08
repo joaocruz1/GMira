@@ -25,12 +25,6 @@ const availableNiches = [
   "Games / Tecnologia",
 ]
 
-interface Service {
-  icon: string
-  name: string
-  description: string
-}
-
 interface PortfolioItem {
   title: string
   category: string
@@ -69,6 +63,7 @@ interface AdminInfluencer {
   priceCopart?: string
   priceVideo?: string
   priceRepost?: string
+  priceFinal?: string
   restrictions?: string
   services?: string
   portfolio?: string
@@ -92,12 +87,6 @@ export default function AdminDashboard() {
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
-  const [services, setServices] = useState<Service[]>([
-    { icon: "📸", name: "Posts Patrocinados", description: "1-5 posts com alta qualidade" },
-    { icon: "🎬", name: "Vídeos/Reels", description: "Conteúdo para Instagram e TikTok" },
-    { icon: "✍️", name: "Storytelling", description: "Narrativas autênticas da marca" },
-    { icon: "📊", name: "Consultorias", description: "Estratégia de conteúdo e growth" },
-  ])
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([])
   const [reviews, setReviews] = useState<Review[]>([])
   const [formData, setFormData] = useState({
@@ -120,9 +109,9 @@ export default function AdminDashboard() {
     reach30Days: "",
     averageReels: "",
     localAudience: "",
-    priceClient: "",
+    priceVideo: "",
     priceCopart: "",
-    priceRepost: "",
+    priceFinal: "",
     restrictions: "",
     status: "PUBLISHED",
   })
@@ -228,26 +217,16 @@ export default function AdminDashboard() {
         reach30Days: influencer.reach30Days || "",
         averageReels: influencer.averageReels || "",
         localAudience: influencer.localAudience || "",
-        priceClient: influencer.priceClient || "",
+        priceVideo: influencer.priceVideo || "",
         priceCopart: influencer.priceCopart || "",
-        priceRepost: influencer.priceRepost || "",
+        priceFinal: influencer.priceFinal || "",
         restrictions: influencer.restrictions || "",
         status: influencer.status || "PUBLISHED",
       })
       setPhotoPreview(influencer.photo || null)
       
-      // Carregar serviços, portfolio e reviews
+      // Carregar portfolio e reviews
       try {
-        if (influencer.services) {
-          setServices(JSON.parse(influencer.services))
-        } else {
-          setServices([
-            { icon: "📸", name: "Posts Patrocinados", description: "1-5 posts com alta qualidade" },
-            { icon: "🎬", name: "Vídeos/Reels", description: "Conteúdo para Instagram e TikTok" },
-            { icon: "✍️", name: "Storytelling", description: "Narrativas autênticas da marca" },
-            { icon: "📊", name: "Consultorias", description: "Estratégia de conteúdo e growth" },
-          ])
-        }
         if (influencer.portfolio) {
           setPortfolioItems(JSON.parse(influencer.portfolio))
         } else {
@@ -260,12 +239,6 @@ export default function AdminDashboard() {
         }
       } catch (error) {
         console.error("Erro ao parsear JSON:", error)
-        setServices([
-          { icon: "📸", name: "Posts Patrocinados", description: "1-5 posts com alta qualidade" },
-          { icon: "🎬", name: "Vídeos/Reels", description: "Conteúdo para Instagram e TikTok" },
-          { icon: "✍️", name: "Storytelling", description: "Narrativas autênticas da marca" },
-          { icon: "📊", name: "Consultorias", description: "Estratégia de conteúdo e growth" },
-        ])
         setPortfolioItems([])
         setReviews([])
       }
@@ -292,19 +265,13 @@ export default function AdminDashboard() {
         reach30Days: "",
         averageReels: "",
         localAudience: "",
-        priceClient: "",
+        priceVideo: "",
         priceCopart: "",
-        priceRepost: "",
+        priceFinal: "",
         restrictions: "",
         status: "PUBLISHED",
       })
       setPhotoPreview(null)
-      setServices([
-        { icon: "📸", name: "Posts Patrocinados", description: "1-5 posts com alta qualidade" },
-        { icon: "🎬", name: "Vídeos/Reels", description: "Conteúdo para Instagram e TikTok" },
-        { icon: "✍️", name: "Storytelling", description: "Narrativas autênticas da marca" },
-        { icon: "📊", name: "Consultorias", description: "Estratégia de conteúdo e growth" },
-      ])
       setPortfolioItems([])
       setReviews([])
     }
@@ -423,7 +390,7 @@ export default function AdminDashboard() {
           ...formData,
           photo: photoUrl,
           niche: JSON.stringify(nicheData),
-          services: JSON.stringify(services),
+          services: JSON.stringify([]),
           portfolio: JSON.stringify(portfolioItems),
           reviews: JSON.stringify(reviews),
         }),
@@ -451,21 +418,6 @@ export default function AdminDashboard() {
     } finally {
       setFormSubmitting(false)
     }
-  }
-
-  // Funções para gerenciar Serviços
-  const addService = () => {
-    setServices([...services, { icon: "📸", name: "", description: "" }])
-  }
-
-  const updateService = (index: number, field: keyof Service, value: string) => {
-    const updated = [...services]
-    updated[index] = { ...updated[index], [field]: value }
-    setServices(updated)
-  }
-
-  const removeService = (index: number) => {
-    setServices(services.filter((_, i) => i !== index))
   }
 
   // Funções para gerenciar Portfolio
@@ -724,7 +676,7 @@ export default function AdminDashboard() {
                     <th className="py-4 px-4 font-semibold text-left">Nicho</th>
                     <th className="py-4 px-4 font-semibold text-left">Localização</th>
                     <th className="py-4 px-4 font-semibold text-left">Alcance</th>
-                    <th className="py-4 px-4 font-semibold text-right">Valor Cliente</th>
+                    <th className="py-4 px-4 font-semibold text-right">Preço Final</th>
                     <th className="py-4 px-4 font-semibold text-right">Ações</th>
                   </tr>
                 </thead>
@@ -801,7 +753,7 @@ export default function AdminDashboard() {
                         <td className="py-4 px-4 text-gray-300">📍 {influencer.city}</td>
                         <td className="py-4 px-4 text-gray-300">{influencer.reach}</td>
                         <td className="py-4 px-4 text-right">
-                          <span className="font-bold text-green-400">{influencer.priceClient || "—"}</span>
+                          <span className="font-bold text-green-400">{influencer.priceFinal || "—"}</span>
                         </td>
                         <td className="py-4 px-4 text-right">
                           <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1111,6 +1063,39 @@ export default function AdminDashboard() {
                       </select>
                     </div>
                     <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Seguidores *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.followers}
+                        onChange={(e) => setFormData({ ...formData, followers: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                        placeholder="Ex: 734, 50k, 100k"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Alcance Médio *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.reach}
+                        onChange={(e) => setFormData({ ...formData, reach: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                        placeholder="Ex: 2904K, 200k, 500k"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Engagement % *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.engagement}
+                        onChange={(e) => setFormData({ ...formData, engagement: e.target.value })}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                        placeholder="Ex: 38.1%, 5.2%, 6.1%"
+                      />
+                    </div>
+                    <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">Vizualizações 30 dias</label>
                       <input
                         type="text"
@@ -1151,34 +1136,38 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Preço Cliente</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Cachê de Vídeo *</label>
                       <input
                         type="text"
-                        value={formData.priceClient}
-                        onChange={(e) => setFormData({ ...formData, priceClient: e.target.value })}
+                        required
+                        value={formData.priceVideo}
+                        onChange={(e) => setFormData({ ...formData, priceVideo: e.target.value })}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                        placeholder="Ex: R$ 2.500,00"
+                        placeholder="Ex: R$ 300"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Preço Coparticipação</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Cachê de Coparticipação *</label>
                       <input
                         type="text"
+                        required
                         value={formData.priceCopart}
                         onChange={(e) => setFormData({ ...formData, priceCopart: e.target.value })}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                        placeholder="Ex: R$ 1.200,00"
+                        placeholder="Ex: R$ 150"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Preço Repost</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Preço Final *</label>
                       <input
                         type="text"
-                        value={formData.priceRepost}
-                        onChange={(e) => setFormData({ ...formData, priceRepost: e.target.value })}
+                        required
+                        value={formData.priceFinal}
+                        onChange={(e) => setFormData({ ...formData, priceFinal: e.target.value })}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                        placeholder="Ex: R$ 50"
+                        placeholder="Ex: R$ 400"
                       />
+                      <p className="text-xs text-purple-300 mt-1">Este é o preço que será usado</p>
                     </div>
                   </div>
                   <div>
@@ -1201,67 +1190,6 @@ export default function AdminDashboard() {
                       className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all resize-none"
                       placeholder="Ex: Não divulga jogos de azar, apenas marcas cruelty-free..."
                     />
-                  </div>
-
-                  {/* Seção de Serviços */}
-                  <div className="border-t border-white/10 pt-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <label className="block text-sm font-medium text-gray-300">Serviços</label>
-                      <Button
-                        type="button"
-                        onClick={addService}
-                        size="sm"
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
-                      >
-                        + Adicionar Serviço
-                      </Button>
-                    </div>
-                    <div className="space-y-3">
-                      {services.map((service, index) => (
-                        <div key={index} className="bg-white/5 border border-white/10 rounded-lg p-4">
-                          <div className="grid grid-cols-12 gap-3 items-start">
-                            <div className="col-span-1">
-                              <input
-                                type="text"
-                                value={service.icon}
-                                onChange={(e) => updateService(index, "icon", e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded px-2 py-2 text-white text-center"
-                                placeholder="📸"
-                              />
-                            </div>
-                            <div className="col-span-4">
-                              <input
-                                type="text"
-                                value={service.name}
-                                onChange={(e) => updateService(index, "name", e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white"
-                                placeholder="Nome do serviço"
-                              />
-                            </div>
-                            <div className="col-span-6">
-                              <input
-                                type="text"
-                                value={service.description}
-                                onChange={(e) => updateService(index, "description", e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white"
-                                placeholder="Descrição"
-                              />
-                            </div>
-                            <div className="col-span-1">
-                              <Button
-                                type="button"
-                                onClick={() => removeService(index)}
-                                size="sm"
-                                variant="ghost"
-                                className="text-red-400 hover:text-red-300"
-                              >
-                                ×
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
                   </div>
 
                   {/* Seção de Portfolio */}
