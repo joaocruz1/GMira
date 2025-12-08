@@ -370,7 +370,7 @@ export default function InfluencerProfile({ params }: Props) {
         </div>
 
         {/* Métricas Principais - Sempre visíveis */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-12">
           {/* Seguidores */}
           <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
             <div className="group">
@@ -382,22 +382,6 @@ export default function InfluencerProfile({ params }: Props) {
                     {influencer.followers || "—"}
                   </div>
                   <p className="text-sm text-gray-400 mt-2">Seguidores</p>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Alcance Médio */}
-          <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-            <div className="group">
-              {reachCount > 0 ? (
-                <AnimatedCount target={reachCount} label="Alcance Médio" />
-              ) : (
-                <>
-                  <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-                    {influencer.reach || "—"}
-                  </div>
-                  <p className="text-sm text-gray-400 mt-2">Alcance Médio</p>
                 </>
               )}
             </div>

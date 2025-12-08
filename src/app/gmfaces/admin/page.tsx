@@ -801,7 +801,6 @@ export default function AdminDashboard() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={handleCloseModal}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -1071,17 +1070,6 @@ export default function AdminDashboard() {
                         onChange={(e) => setFormData({ ...formData, followers: e.target.value })}
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
                         placeholder="Ex: 734, 50k, 100k"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Alcance Médio *</label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.reach}
-                        onChange={(e) => setFormData({ ...formData, reach: e.target.value })}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                        placeholder="Ex: 2904K, 200k, 500k"
                       />
                     </div>
                     <div>

@@ -201,7 +201,7 @@ const contactInfo = [
   },
   {
     icon: <MapPin className="h-4 w-4" />,
-    text: "Pouso Alegre, MG",
+    text: "Ouro Fino, MG",
     href: "https://maps.google.com/?q=Pouso+Alegre,MG",
   },
 ]
