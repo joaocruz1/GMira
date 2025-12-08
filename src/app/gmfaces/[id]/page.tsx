@@ -369,26 +369,6 @@ export default function InfluencerProfile({ params }: Props) {
           </div>
         </div>
 
-        {/* Métricas Principais - Sempre visíveis */}
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-12">
-          {/* Seguidores */}
-          <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300">
-            <div className="group">
-              {followersCount > 0 ? (
-                <AnimatedCount target={followersCount} label="Seguidores" />
-              ) : (
-                <>
-                  <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-                    {influencer.followers || "—"}
-                  </div>
-                  <p className="text-sm text-gray-400 mt-2">Seguidores</p>
-                </>
-              )}
-            </div>
-          </div>
-
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           {/* Left Column */}
           <div className="space-y-6">
@@ -456,6 +436,24 @@ export default function InfluencerProfile({ params }: Props) {
 
           {/* Right Column - Stats Adicionais */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Seguidores */}
+            {influencer.followers && (
+              <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300 mb-6">
+                <div className="group">
+                  {followersCount > 0 ? (
+                    <AnimatedCount target={followersCount} label="Seguidores" />
+                  ) : (
+                    <>
+                      <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                        {influencer.followers || "—"}
+                      </div>
+                      <p className="text-sm text-gray-400 mt-2">Seguidores</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Métricas Adicionais (30 dias, reels, etc) */}
             {(influencer.views30Days || influencer.reach30Days || influencer.averageReels || influencer.localAudience) && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

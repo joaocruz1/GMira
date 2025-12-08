@@ -674,22 +674,67 @@ export default function GMFacesCatalog() {
                     </div>
 
                     <CardHeader className="pb-4">
-                      {/* Nome da categoria - Nicho Principal */}
+                      {/* Nichos - Principal maior e outros menores */}
                       <div className="mb-3">
-                        <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">
-                          {(() => {
-                            try {
-                              const nicheData = JSON.parse(influencer.niche || "[]")
-                              if (typeof nicheData === "object" && nicheData !== null && nicheData.mainNiche) {
-                                return nicheData.mainNiche.toUpperCase()
-                              }
-                              if (Array.isArray(nicheData) && nicheData.length > 0) {
-                                return nicheData[0].toUpperCase()
-                              }
-                            } catch {}
-                            return influencer.niche.toUpperCase()
-                          })()}
-                        </p>
+                        {(() => {
+                          try {
+                            const nicheData = JSON.parse(influencer.niche || "[]")
+                            if (typeof nicheData === "object" && nicheData !== null && nicheData.niches && nicheData.mainNiche) {
+                              const mainNiche = nicheData.mainNiche
+                              const otherNiches = nicheData.niches.filter((n: string) => n !== mainNiche)
+                              
+                              return (
+                                <div className="space-y-1.5">
+                                  {/* Nicho Principal - Maior */}
+                                  <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">
+                                    {mainNiche.toUpperCase()}
+                                  </p>
+                                  {/* Outros Nichos - Menores */}
+                                  {otherNiches.length > 0 && (
+                                    <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                                      {otherNiches.map((niche: string, idx: number) => (
+                                        <span
+                                          key={idx}
+                                          className="text-[9px] text-gray-500 font-normal uppercase tracking-wide opacity-70"
+                                        >
+                                          {niche}
+                                          {idx < otherNiches.length - 1 && <span className="mx-1 text-gray-600">•</span>}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            }
+                            if (Array.isArray(nicheData) && nicheData.length > 0) {
+                              return (
+                                <div className="space-y-1.5">
+                                  <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">
+                                    {nicheData[0].toUpperCase()}
+                                  </p>
+                                  {nicheData.length > 1 && (
+                                    <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                                      {nicheData.slice(1).map((niche: string, idx: number) => (
+                                        <span
+                                          key={idx}
+                                          className="text-[9px] text-gray-500 font-normal uppercase tracking-wide opacity-70"
+                                        >
+                                          {niche}
+                                          {idx < nicheData.slice(1).length - 1 && <span className="mx-1 text-gray-600">•</span>}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )
+                            }
+                          } catch {}
+                          return (
+                            <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">
+                              {influencer.niche.toUpperCase()}
+                            </p>
+                          )
+                        })()}
                       </div>
 
                       {/* Nome */}
@@ -727,13 +772,7 @@ export default function GMFacesCatalog() {
                         </span>
                       </div>
 
-                      {/* Preço final */}
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="text-gray-300">
-                          <span className="font-semibold text-white">Preço final:</span>{" "}
-                          {influencer.priceFinal || influencer.priceClient || "Sob consulta"}
-                        </span>
-                      </div>
+                     
                     </CardContent>
 
                     <CardFooter className="pt-4 border-t border-white/5">
