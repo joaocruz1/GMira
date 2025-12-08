@@ -65,43 +65,47 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Campos obrigatórios não informados." }, { status: 400 })
     }
 
-    // Criar objeto apenas com campos válidos do schema
-    const influencerData: any = {
+    // Lista explícita de campos válidos do schema Prisma
+    const influencerData: Record<string, any> = {
       name,
-      photo: photo || null,
-      email: email || null,
-      phone: phone || null,
-      instagram: instagram || null,
-      tiktok: tiktok || null,
-      youtube: youtube || null,
       city,
       niche,
       bio,
       gender,
-      followers: followers || null,
-      reach: reach || null,
-      engagement: engagement || null,
-      views30Days: views30Days || null,
-      reach30Days: reach30Days || null,
-      averageReels: averageReels || null,
-      localAudience: localAudience || null,
-      priceMin: priceMin || null,
-      priceClient: priceClient || null,
-      priceCopart: priceCopart || null,
-      priceVideo: priceVideo || null,
-      priceRepost: priceRepost || null,
-      priceFinal: priceFinal || null,
-      restrictions: restrictions || null,
-      services: services || null,
-      portfolio: portfolio || null,
-      reviews: reviews || null,
       status: status ?? "PUBLISHED",
     }
 
-    // Remover campos undefined para evitar problemas
-    Object.keys(influencerData).forEach(key => {
-      if (influencerData[key] === undefined) {
-        delete influencerData[key]
+    // Adicionar campos opcionais apenas se existirem e não forem undefined
+    const optionalFields: Record<string, any> = {
+      photo,
+      email,
+      phone,
+      instagram,
+      tiktok,
+      youtube,
+      followers,
+      reach,
+      engagement,
+      views30Days,
+      reach30Days,
+      averageReels,
+      localAudience,
+      priceMin,
+      priceClient,
+      priceCopart,
+      priceVideo,
+      priceRepost,
+      priceFinal,
+      restrictions,
+      services,
+      portfolio,
+      reviews,
+    }
+
+    // Adicionar apenas campos que têm valor (não undefined)
+    Object.entries(optionalFields).forEach(([key, value]) => {
+      if (value !== undefined) {
+        influencerData[key] = value || null
       }
     })
 
