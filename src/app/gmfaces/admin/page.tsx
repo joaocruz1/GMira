@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, LogOut } from "lucide-react"
+import { X, LogOut, GripVertical } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 const availableNiches = [
@@ -69,6 +69,7 @@ interface AdminInfluencer {
   portfolio?: string
   reviews?: string
   status?: string
+  displayOrder?: number
 }
 
 export default function AdminDashboard() {
@@ -89,6 +90,8 @@ export default function AdminDashboard() {
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([])
   const [reviews, setReviews] = useState<Review[]>([])
+  const [draggedId, setDraggedId] = useState<string | null>(null)
+  const [draggedOverId, setDraggedOverId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: "",
     photo: "",
@@ -216,7 +219,29 @@ export default function AdminDashboard() {
         views30Days: influencer.views30Days || "",
         reach30Days: influencer.reach30Days || "",
         averageReels: influencer.averageReels || "",
-        localAudience: influencer.localAudience || "",
+        localAudience: (() => {
+          // Converter formato separado por vírgula para linhas ao editar
+          // Usar regex para identificar padrões "número% cidade" sem quebrar vírgulas dos decimais
+          const value = influencer.localAudience || ""
+          if (value && value.includes(',')) {
+            // Regex para encontrar padrão: número (com vírgula ou ponto decimal) seguido de % e cidade
+            const pattern = /([\d]+[,.]?[\d]*)\%\s+([^,]+)/g
+            const matches = [...value.matchAll(pattern)]
+            
+            if (matches.length > 0) {
+              // Reconstruir linhas preservando formato original
+              return matches.map(match => {
+                const percentage = match[1]
+                const city = match[2].trim()
+                return `${percentage}% ${city}`
+              }).join('\n')
+            }
+            
+            // Fallback: tentar split simples (pode quebrar porcentagens com vírgula)
+            return value.split(',').map(item => item.trim()).join('\n')
+          }
+          return value
+        })(),
         priceVideo: influencer.priceVideo || "",
         priceCopart: influencer.priceCopart || "",
         priceFinal: influencer.priceFinal || "",
@@ -383,11 +408,20 @@ export default function AdminDashboard() {
           }
         : { niches: [], mainNiche: "" }
 
+      // Converter localAudience de linhas para formato separado por vírgula
+      const localAudienceFormatted = formData.localAudience
+        ? formData.localAudience.split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .join(', ')
+        : formData.localAudience
+
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
+          localAudience: localAudienceFormatted,
           photo: photoUrl,
           niche: JSON.stringify(nicheData),
           services: JSON.stringify([]),
@@ -450,6 +484,66 @@ export default function AdminDashboard() {
     setReviews(reviews.filter((_, i) => i !== index))
   }
 
+  const handleDragStart = (id: string) => {
+    setDraggedId(id)
+  }
+
+  const handleDragOver = (e: React.DragEvent, id: string) => {
+    e.preventDefault()
+    setDraggedOverId(id)
+  }
+
+  const handleDragEnd = async () => {
+    if (!draggedId || !draggedOverId || draggedId === draggedOverId) {
+      setDraggedId(null)
+      setDraggedOverId(null)
+      return
+    }
+
+    const draggedIndex = filteredInfluencers.findIndex((inf) => inf.id === draggedId)
+    const draggedOverIndex = filteredInfluencers.findIndex((inf) => inf.id === draggedOverId)
+
+    if (draggedIndex === -1 || draggedOverIndex === -1) {
+      setDraggedId(null)
+      setDraggedOverId(null)
+      return
+    }
+
+    // Criar nova ordem
+    const newOrder = [...filteredInfluencers]
+    const [removed] = newOrder.splice(draggedIndex, 1)
+    newOrder.splice(draggedOverIndex, 0, removed)
+
+    // Atualizar ordem localmente
+    const updatedInfluencers = newOrder.map((inf, index) => ({
+      ...inf,
+      displayOrder: index + 1,
+    }))
+    setInfluencers(updatedInfluencers)
+
+    // Enviar nova ordem para o servidor
+    try {
+      const res = await fetch("/api/gmfaces/influencers/reorder", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          influencerIds: newOrder.map((inf) => inf.id),
+        }),
+      })
+
+      if (!res.ok) {
+        throw new Error("Erro ao atualizar ordem")
+      }
+    } catch (error) {
+      console.error(error)
+      // Reverter em caso de erro
+      await loadInfluencers()
+    }
+
+    setDraggedId(null)
+    setDraggedOverId(null)
+  }
+
   const handleDelete = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir este influenciador?")) {
       return
@@ -473,7 +567,14 @@ export default function AdminDashboard() {
     }
   }
 
-  const filteredInfluencers = influencers.filter((inf) => {
+  // Ordenar influenciadores por displayOrder antes de filtrar
+  const sortedInfluencers = [...influencers].sort((a, b) => {
+    const orderA = a.displayOrder ?? 999999
+    const orderB = b.displayOrder ?? 999999
+    return orderA - orderB
+  })
+
+  const filteredInfluencers = sortedInfluencers.filter((inf) => {
     const matchesSearch =
       inf.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       inf.city.toLowerCase().includes(searchTerm.toLowerCase())
@@ -657,7 +758,7 @@ export default function AdminDashboard() {
         <Card className="bg-white/5 border-white/10">
           <CardHeader className="pb-4 border-b border-white/10">
             <CardTitle className="flex items-center justify-between">
-              <span>Catálogo de Influenciadores</span>
+              <span className="text-white text-lg font-bold">Catálogo de Influenciadores</span>
                 <span className="text-xs font-normal text-gray-400 bg-white/5 px-3 py-1 rounded-full">
                   {isLoading
                     ? "Carregando..."
@@ -689,9 +790,22 @@ export default function AdminDashboard() {
                     </tr>
                   ) : filteredInfluencers.length > 0 ? (
                     filteredInfluencers.map((influencer) => (
-                      <tr key={influencer.id} className="hover:bg-white/5 transition-all duration-200 group">
+                      <tr
+                        key={influencer.id}
+                        draggable
+                        onDragStart={() => handleDragStart(influencer.id)}
+                        onDragOver={(e) => handleDragOver(e, influencer.id)}
+                        onDragEnd={handleDragEnd}
+                        className={`hover:bg-white/5 transition-all duration-200 group cursor-move ${
+                          draggedId === influencer.id ? "opacity-50" : ""
+                        } ${
+                          draggedOverId === influencer.id ? "bg-purple-500/20 border-t-2 border-purple-400" : ""
+                        }`}
+                      >
                         <td className="py-4 px-4">
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2">
+                            <GripVertical className="w-4 h-4 text-gray-500 cursor-grab active:cursor-grabbing" />
+                            <div className="flex items-center gap-3">
                             {influencer.photo ? (
                               <img
                                 src={influencer.photo}
@@ -708,6 +822,7 @@ export default function AdminDashboard() {
                                 {influencer.name}
                               </div>
                               <div className="text-xs text-gray-500">{influencer.gender}</div>
+                            </div>
                             </div>
                           </div>
                         </td>
@@ -1104,13 +1219,15 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">Público local</label>
-                      <input
-                        type="text"
+                      <textarea
                         value={formData.localAudience}
                         onChange={(e) => setFormData({ ...formData, localAudience: e.target.value })}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                        placeholder="Ex: 60%, 70%"
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all min-h-[120px] resize-y font-mono text-sm"
+                        placeholder="47% Ouro Fino&#10;3,4% Inconfidentes&#10;3,1% Pouso Alegre"
                       />
+                      <p className="text-xs text-purple-300 mt-1">
+                        Digite uma cidade por linha (pressione Enter para nova linha). As porcentagens serão preservadas exatamente como digitadas ao salvar.
+                      </p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">Cachê de Vídeo *</label>

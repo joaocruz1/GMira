@@ -25,6 +25,7 @@ enum InfluencerStatus {
 model Influencer {
   id             String            @id @default(uuid())
   name           String
+  slug           String?           @unique // Slug para URL amigável
   photo          String?           // URL da foto do perfil
   email          String?
   phone          String?
@@ -53,6 +54,7 @@ model Influencer {
   portfolio      String?           // JSON array de itens do portfolio
   reviews        String?           // JSON array de avaliações
   status         InfluencerStatus  @default(PENDING)
+  displayOrder   Int?              // Ordem de exibição no catálogo
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
 }

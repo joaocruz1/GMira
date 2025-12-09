@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { generateSlug } from "@/lib/slug"
 
 export async function GET(req: NextRequest) {
   try {
@@ -8,7 +9,12 @@ export async function GET(req: NextRequest) {
 
     const influencers = await prisma.influencer.findMany({
       where: all ? {} : { status: "PUBLISHED" },
-      orderBy: { createdAt: "desc" },
+      orderBy: all 
+        ? { createdAt: "desc" } 
+        : [
+            { displayOrder: "asc" },
+            { createdAt: "desc" }
+          ],
     })
 
     return NextResponse.json(influencers)
@@ -65,14 +71,37 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Campos obrigatórios não informados." }, { status: 400 })
     }
 
+    // Gerar slug a partir do nome
+    const baseSlug = generateSlug(name)
+    let slug = baseSlug
+    let counter = 1
+    
+    // Verificar se slug já existe e adicionar número se necessário
+    while (true) {
+      const existing = await prisma.influencer.findUnique({
+        where: { slug },
+      })
+      if (!existing) break
+      slug = `${baseSlug}-${counter}`
+      counter++
+    }
+
+    // Obter o maior displayOrder atual e adicionar 1 para o novo influenciador
+    const maxOrder = await prisma.influencer.aggregate({
+      _max: { displayOrder: true },
+    })
+    const newDisplayOrder = (maxOrder._max.displayOrder ?? 0) + 1
+
     // Lista explícita de campos válidos do schema Prisma
     const influencerData: Record<string, any> = {
       name,
+      slug,
       city,
       niche,
       bio,
       gender,
       status: status ?? "PUBLISHED",
+      displayOrder: newDisplayOrder,
     }
 
     // Adicionar campos opcionais apenas se existirem e não forem undefined

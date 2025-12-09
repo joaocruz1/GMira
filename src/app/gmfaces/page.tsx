@@ -338,6 +338,7 @@ function NavButton({
 }
 
 interface ApiInfluencer {
+  slug?: string
   id: string
   name: string
   photo?: string
@@ -774,6 +775,16 @@ export default function GMFacesCatalog() {
                         </div>
                       )}
 
+                      {/* Vizualizações 30 dias */}
+                      {influencer.views30Days && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-gray-300">
+                            <span className="font-semibold text-white">Vizualizações 30 dias:</span>{" "}
+                            {influencer.views30Days || "—"}
+                          </span>
+                        </div>
+                      )}
+
                       {/* Média por reels */}
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-gray-300">
@@ -790,7 +801,7 @@ export default function GMFacesCatalog() {
                         asChild
                         className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-bold shadow-lg hover:shadow-purple-600/50 transition-all duration-300 transform group-hover:scale-105"
                       >
-                        <Link href={`/gmfaces/${influencer.id}`}>👉 Ver Perfil</Link>
+                        <Link href={`/gmfaces/${influencer.slug || influencer.id}`}>👉 Ver Perfil</Link>
                       </Button>
                     </CardFooter>
                   </Card>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { generateSlug } from "@/lib/slug"
 
 interface RouteContext {
   params: { id: string }
@@ -42,12 +43,38 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     const {
       niches,
       mainNiche,
+      name,
       ...validData
     } = body
 
+    // Se o nome mudou, gerar novo slug
+    if (name) {
+      const baseSlug = generateSlug(name)
+      let slug = baseSlug
+      let counter = 1
+      
+      // Verificar se slug já existe (exceto para o próprio influenciador)
+      while (true) {
+        const existing = await prisma.influencer.findFirst({
+          where: { 
+            slug,
+            NOT: { id }
+          },
+        })
+        if (!existing) break
+        slug = `${baseSlug}-${counter}`
+        counter++
+      }
+      
+      validData.slug = slug
+    }
+
     const influencer = await prisma.influencer.update({
       where: { id },
-      data: validData,
+      data: {
+        ...validData,
+        ...(name && { name }),
+      },
     })
 
     return NextResponse.json(influencer)

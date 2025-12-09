@@ -7,8 +7,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useEffect, useState, use } from "react"
 import { Heart, MessageCircle, Share2, Instagram, TrendingUp, Users, Eye } from "lucide-react"
 
+// Ícone do TikTok customizado
+function TikTokIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+    </svg>
+  )
+}
+
 interface Props {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }
 
 interface AnimatedCountProps {
@@ -104,6 +118,7 @@ interface Review {
 
 interface ApiInfluencer {
   id: string
+  slug?: string
   name: string
   photo?: string
   city: string
@@ -143,7 +158,7 @@ export default function InfluencerProfile({ params }: Props) {
   useEffect(() => {
     const loadInfluencer = async () => {
       try {
-        const res = await fetch(`/api/gmfaces/influencers/${resolvedParams.id}`)
+        const res = await fetch(`/api/gmfaces/influencers/slug/${resolvedParams.slug}`)
         if (!res.ok) {
           if (res.status === 404) {
             notFound()
@@ -162,7 +177,7 @@ export default function InfluencerProfile({ params }: Props) {
     }
 
     loadInfluencer()
-  }, [resolvedParams.id])
+  }, [resolvedParams.slug])
 
   if (isLoading) {
     return (
@@ -181,7 +196,11 @@ export default function InfluencerProfile({ params }: Props) {
   const whatsappLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`
 
   // Converter valores para números
-  const followersCount = parseCount(influencer.followers)
+  // Verificar se o valor já está formatado com ponto como separador de milhares (ex: "22.200k", "22.200")
+  // Padrão: número, ponto, 3 dígitos (separador de milhares)
+  const followersValue = influencer.followers || ""
+  const isFormattedWithDot = /^\d+\.\d{3}/.test(followersValue.replace(/[^\d.]/g, ''))
+  const followersCount = isFormattedWithDot ? 0 : parseCount(influencer.followers)
   const reachCount = parseCount(influencer.reach)
   const engagementValue = parseEngagement(influencer.engagement)
 
@@ -264,24 +283,6 @@ export default function InfluencerProfile({ params }: Props) {
           </div>
         </div>
 
-        <div className="absolute bottom-8 left-8 z-20 flex items-center gap-3">
-          {influencer.status === "PUBLISHED" ? (
-            <>
-              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-gray-300"></span>
-            </>
-          ) : influencer.status === "PENDING" ? (
-            <>
-              <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-gray-300">Aguardando aprovação</span>
-            </>
-          ) : (
-            <>
-              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-              <span className="text-sm text-gray-300">Indisponível</span>
-            </>
-          )}
-        </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 relative z-20">
@@ -406,11 +407,11 @@ export default function InfluencerProfile({ params }: Props) {
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-all duration-300 group/link"
                   >
-                    <MessageCircle className="w-5 h-5 text-purple-400" />
+                    <TikTokIcon className="w-5 h-5 text-purple-400" />
                     <span className="text-sm text-gray-300 group-hover/link:text-white">
                       {influencer.tiktok}
                     </span>
-                    <Share2 className="w-4 h-4 text-gray-600 group-hover/link:text-gray-300 ml-auto" />
+                    <TikTokIcon className="w-4 h-4 text-gray-600 group-hover/link:text-gray-300 ml-auto" />
                   </a>
                 )}
                 {influencer.youtube && (
@@ -440,7 +441,7 @@ export default function InfluencerProfile({ params }: Props) {
             {influencer.followers && (
               <div className="bg-gradient-to-br from-white/5 to-white/5 backdrop-blur border border-white/10 rounded-xl p-6 hover:border-purple-500/50 hover:bg-white/10 transition-all duration-300 mb-6">
                 <div className="group">
-                  {followersCount > 0 ? (
+                  {followersCount > 0 && !isFormattedWithDot ? (
                     <AnimatedCount target={followersCount} label="Seguidores" />
                   ) : (
                     <>
@@ -498,46 +499,29 @@ export default function InfluencerProfile({ params }: Props) {
                   <div className="space-y-3">
                     {(() => {
                       try {
-                        // Parsear diferentes formatos:
-                        // "49,9% Ouro Fino, 2,5% Inconfidentes" (porcentagem primeiro)
-                        // "Ouro Fino: 49,9%, Inconfidentes: 2,5%" (cidade primeiro com dois pontos)
-                        // "Ouro Fino 49,9%, Inconfidentes 2,5%" (cidade primeiro sem dois pontos)
-                        
+                        // Parsear formato: "47,6% Ouro Fino, 3,4% Inconfidentes, 1% Pouso Alegre"
+                        // Usar regex para encontrar padrões "número% cidade" sem quebrar nas vírgulas dos decimais
                         const text = influencer.localAudience.trim()
-                        const parts = text.split(',').map(p => p.trim()).filter(p => p.length > 0)
                         
-                        const cities: Array<{ city: string; percentage: number }> = []
+                        // Regex para encontrar padrão: número (com vírgula ou ponto decimal) seguido de % e cidade
+                        // Captura: "47,6% Ouro Fino" ou "47.6% Ouro Fino" ou "47% Ouro Fino"
+                        const pattern = /([\d]+[,.]?[\d]*)\%\s+([^,]+)/g
+                        const matches = [...text.matchAll(pattern)]
                         
-                        for (const part of parts) {
-                          let city = ''
-                          let percentage = 0
-                          
-                          // Padrão 1: "49,9% Ouro Fino" ou "49.9% Ouro Fino" (porcentagem primeiro) - PRIORIDADE
-                          let match = part.match(/^([\d,.]+)%\s+(.+)$/i)
-                          if (match) {
-                            const percStr = match[1].replace(',', '.')
-                            percentage = parseFloat(percStr)
-                            city = match[2].trim()
-                          } else {
-                            // Padrão 2: "Ouro Fino: 49,9%" (cidade primeiro com dois pontos)
-                            match = part.match(/^(.+?):\s*([\d,.]+)%$/i)
-                            if (match) {
-                              city = match[1].trim()
-                              const percStr = match[2].replace(',', '.')
-                              percentage = parseFloat(percStr)
-                            } else {
-                              // Padrão 3: "Ouro Fino 49,9%" (cidade primeiro sem dois pontos)
-                              match = part.match(/^(.+?)\s+([\d,.]+)%$/i)
-                              if (match) {
-                                city = match[1].trim()
-                                const percStr = match[2].replace(',', '.')
-                                percentage = parseFloat(percStr)
-                              }
-                            }
-                          }
+                        const cities: Array<{ city: string; percentage: number; originalPercentage: string }> = []
+                        
+                        for (const match of matches) {
+                          const originalPercentage = match[1] // Preservar formato original (com vírgula ou ponto)
+                          const percStr = originalPercentage.replace(',', '.') // Converter para parseFloat
+                          const percentage = parseFloat(percStr)
+                          const city = match[2].trim()
                           
                           if (city && !isNaN(percentage) && percentage > 0) {
-                            cities.push({ city, percentage })
+                            cities.push({ 
+                              city, 
+                              percentage,
+                              originalPercentage // Preservar formato original para exibição
+                            })
                           }
                         }
                         
@@ -545,20 +529,27 @@ export default function InfluencerProfile({ params }: Props) {
                         cities.sort((a, b) => b.percentage - a.percentage)
 
                         if (cities.length > 0) {
-                          return cities.map((item, idx) => (
-                            <div key={idx} className="space-y-1.5">
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-300 font-medium">{item.city}</span>
-                                <span className="text-sm font-semibold text-purple-400">{item.percentage.toFixed(1).replace('.', ',')}%</span>
+                          return cities.map((item, idx) => {
+                            // Formatar porcentagem: se tinha vírgula, manter vírgula; se tinha ponto, manter ponto
+                            const displayPercentage = item.originalPercentage.includes(',') 
+                              ? item.originalPercentage 
+                              : item.originalPercentage.replace('.', ',')
+                            
+                            return (
+                              <div key={idx} className="space-y-1.5">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm text-gray-300 font-medium">{item.city}</span>
+                                  <span className="text-sm font-semibold text-purple-400">{displayPercentage}%</span>
+                                </div>
+                                <div className="w-full bg-white/5 rounded-full h-2.5 overflow-hidden">
+                                  <div
+                                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-700 ease-out"
+                                    style={{ width: `${item.percentage}%` }}
+                                  />
+                                </div>
                               </div>
-                              <div className="w-full bg-white/5 rounded-full h-2.5 overflow-hidden">
-                                <div
-                                  className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-700 ease-out"
-                                  style={{ width: `${item.percentage}%` }}
-                                />
-                              </div>
-                            </div>
-                          ))
+                            )
+                          })
                         }
                       } catch (error) {
                         console.error("Erro ao parsear público local:", error)
@@ -649,56 +640,21 @@ export default function InfluencerProfile({ params }: Props) {
             <Card className="bg-gradient-to-br from-purple-600/10 to-pink-600/10 backdrop-blur border-purple-500/30 hover:border-purple-500/60 transition-all duration-300 group">
               <div className="h-1 bg-gradient-to-r from-purple-500 to-pink-500 group-hover:shadow-[0_0_30px_rgba(236,72,153,0.5)] transition-all duration-300"></div>
               <CardHeader>
-                <CardTitle className="text-xl">Avaliações</CardTitle>
+                <CardTitle className="text-xl text-white">Valores</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {(influencer.priceVideo || influencer.priceCopart || influencer.priceFinal) && (
-                  <div className="border border-purple-500/30 rounded-lg p-4 bg-purple-500/5">
-                    <div className="space-y-3">
-                      {influencer.priceVideo && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-300">Cachê de Vídeo</span>
-                          <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
-                            {influencer.priceVideo}
-                          </span>
-                        </div>
-                      )}
-                      {influencer.priceCopart && (
-                        <>
-                          {influencer.priceVideo && (
-                            <div className="h-px bg-gradient-to-r from-purple-500/30 to-pink-500/30"></div>
-                          )}
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-300">Cachê de Coparticipação</span>
-                            <span className="text-xl font-bold text-purple-400">{influencer.priceCopart}</span>
-                          </div>
-                        </>
-                      )}
-                      {influencer.priceFinal && (
-                        <>
-                          {(influencer.priceVideo || influencer.priceCopart) && (
-                            <div className="h-px bg-gradient-to-r from-purple-500/30 to-pink-500/30"></div>
-                          )}
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-300 font-semibold">Preço Final</span>
-                            <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
-                              {influencer.priceFinal}
-                            </span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )}
-                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-lg p-4 border border-slate-700/50">
-                  <div className="mb-2">
-                    <p className="text-sm font-semibold text-gray-300 mb-1">Preço Final</p>
-                    <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-lg p-6 border border-slate-700/50">
+                  <div className="mb-4">
+                    <p className="text-sm font-semibold text-gray-300 mb-2">Preço Mínimo da Campanha</p>
+                    <p className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
                       {influencer.priceFinal || influencer.priceClient || influencer.priceCopart || "Sob consulta"}
                     </p>
                   </div>
-                  <p className="text-xs text-gray-400 mt-3 leading-relaxed">
-                    Valores podem variar conforme tipo de conteúdo, roteiro, deslocamento e necessidade da marca.
+                  <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+                    Inclui gravação, direção, edição e entrega final do vídeo.
+                  </p>
+                  <p className="text-xs text-gray-400 leading-relaxed">
+                    Valor pode variar conforme roteiro, deslocamento, quantidade de vídeos, horários especiais e repostagem no perfil do influenciador.
                   </p>
                 </div>
               </CardContent>
