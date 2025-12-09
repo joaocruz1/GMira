@@ -442,7 +442,15 @@ export default function GMFacesCatalog() {
       }
     }
     
-    const matchesCity = selectedCity === "Todas" || influencer.city === selectedCity
+    // Comparação flexível de cidade: verifica se a cidade selecionada está contida no campo city
+    let matchesCity = true
+    if (selectedCity !== "Todas") {
+      const cityLower = influencer.city?.toLowerCase() || ""
+      const selectedCityLower = selectedCity.toLowerCase()
+      // Verifica se a cidade selecionada está contida no campo city (ex: "Ouro Fino" em "Ouro Fino - MG")
+      matchesCity = cityLower.includes(selectedCityLower)
+    }
+    
     const matchesGender = selectedGender === "Todos" || influencer.gender === selectedGender
 
     return matchesSearch && matchesNiche && matchesCity && matchesGender
@@ -687,9 +695,9 @@ export default function GMFacesCatalog() {
                     <CardHeader className="pb-4">
                       {/* Nichos - Principal maior e outros menores */}
                       <div className="mb-3">
-                        {(() => {
-                          try {
-                            const nicheData = JSON.parse(influencer.niche || "[]")
+                          {(() => {
+                            try {
+                              const nicheData = JSON.parse(influencer.niche || "[]")
                             if (typeof nicheData === "object" && nicheData !== null && nicheData.niches && nicheData.mainNiche) {
                               const mainNiche = nicheData.mainNiche
                               const otherNiches = nicheData.niches.filter((n: string) => n !== mainNiche)
@@ -716,8 +724,8 @@ export default function GMFacesCatalog() {
                                   )}
                                 </div>
                               )
-                            }
-                            if (Array.isArray(nicheData) && nicheData.length > 0) {
+                              }
+                              if (Array.isArray(nicheData) && nicheData.length > 0) {
                               return (
                                 <div className="space-y-1.5">
                                   <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">
@@ -738,12 +746,12 @@ export default function GMFacesCatalog() {
                                   )}
                                 </div>
                               )
-                            }
-                          } catch {}
+                              }
+                            } catch {}
                           return (
                             <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">
                               {influencer.niche.toUpperCase()}
-                            </p>
+                        </p>
                           )
                         })()}
                       </div>
@@ -767,22 +775,22 @@ export default function GMFacesCatalog() {
                     <CardContent className="flex-grow pb-4 space-y-3">
                       {/* Seguidores */}
                       {influencer.followers && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <span className="text-gray-300">
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-300">
                             <span className="font-semibold text-white">Seguidores:</span>{" "}
                             {influencer.followers}
-                          </span>
-                        </div>
+                        </span>
+                      </div>
                       )}
 
                       {/* Vizualizações 30 dias */}
                       {influencer.views30Days && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <span className="text-gray-300">
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-300">
                             <span className="font-semibold text-white">Vizualizações 30 dias:</span>{" "}
                             {influencer.views30Days || "—"}
-                          </span>
-                        </div>
+                        </span>
+                      </div>
                       )}
 
                       {/* Média por reels */}

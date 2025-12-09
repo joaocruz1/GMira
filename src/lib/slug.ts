@@ -13,3 +13,4 @@ export function generateSlug(text: string): string {
     .replace(/-+/g, "-") // Remove hífens duplicados
 }
 
+
