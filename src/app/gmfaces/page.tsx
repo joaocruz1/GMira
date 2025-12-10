@@ -406,10 +406,24 @@ export default function GMFacesCatalog() {
     }
 
     loadInfluencers()
+    
+    // Registrar acesso ao catálogo
+    fetch("/api/gmfaces/analytics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eventType: "catalog_access" }),
+    }).catch(console.error)
   }, [])
 
   // Função para lidar com o clique no botão do WhatsApp
   const handleWhatsAppClick = () => {
+    // Registrar clique no WhatsApp
+    fetch("/api/gmfaces/analytics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ eventType: "whatsapp_click" }),
+    }).catch(console.error)
+    
     const phoneNumber = "553599574977"
     const defaultMessage = "Olá, gostaria de mais informações!"
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(defaultMessage)}`

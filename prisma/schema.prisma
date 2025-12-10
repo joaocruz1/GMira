@@ -69,4 +69,16 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+model Analytics {
+  id            String   @id @default(uuid())
+  eventType     String   // 'profile_view', 'whatsapp_click', 'catalog_access'
+  influencerId  String?  // ID do influenciador (null para eventos do catálogo)
+  metadata      String?  // JSON com dados adicionais
+  createdAt     DateTime @default(now())
+  
+  @@index([eventType])
+  @@index([influencerId])
+  @@index([createdAt])
+}
+
 

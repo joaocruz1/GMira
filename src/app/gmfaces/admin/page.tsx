@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, LogOut, GripVertical } from "lucide-react"
+import { X, LogOut, GripVertical, ChevronDown } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 const availableNiches = [
@@ -92,6 +92,9 @@ export default function AdminDashboard() {
   const [reviews, setReviews] = useState<Review[]>([])
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const [draggedOverId, setDraggedOverId] = useState<string | null>(null)
+  const [stats, setStats] = useState<any>(null)
+  const [isLoadingStats, setIsLoadingStats] = useState(true)
+  const [isNicheDistributionOpen, setIsNicheDistributionOpen] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     photo: "",
@@ -157,8 +160,22 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (isAuthenticated) {
       loadInfluencers()
+      loadStats()
     }
   }, [isAuthenticated])
+
+  const loadStats = async () => {
+    try {
+      const res = await fetch("/api/gmfaces/admin/stats")
+      if (!res.ok) throw new Error("Erro ao carregar estatísticas")
+      const data = await res.json()
+      setStats(data)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsLoadingStats(false)
+    }
+  }
 
   const handleLogout = async () => {
     try {
@@ -676,54 +693,258 @@ export default function AdminDashboard() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-white/5 border-white/10 hover:bg-white/8 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                  <span className="text-xl">👥</span>
-                  Total de Influenciadores
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-end gap-2">
-                  <div className="text-4xl font-bold text-white">
-                    {isLoading ? "…" : influencers.length}
-                  </div>
-                  <span className="text-xs text-green-400 mb-1">+2 este mês</span>
-                </div>
-              </CardContent>
-            </Card>
+          {isLoadingStats ? (
+            <div className="text-center py-8 text-gray-400">Carregando estatísticas...</div>
+          ) : stats ? (
+            <div className="space-y-6">
+              {/* Primeira linha: Total, Meta Mensal, Nicho Mais Presente */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* 1. Total de Influenciadores */}
+                <Card className="bg-white/5 border-white/10 hover:bg-white/8 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                      <span className="text-xl">👥</span>
+                      Total de Influenciadores
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-end gap-2">
+                      <div className="text-4xl font-bold text-white">
+                        {stats.totalActive || 0}
+                      </div>
+                      {stats.growthThisMonth !== undefined && (
+                        <span className={`text-xs mb-1 ${stats.growthThisMonth >= 0 ? "text-green-400" : "text-red-400"}`}>
+                          {stats.growthThisMonth >= 0 ? "+" : ""}{stats.growthThisMonth} este mês
+                        </span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
 
-            <Card className="bg-white/5 border-white/10 hover:bg-white/8 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/10">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                  <span className="text-xl">⏳</span>
-                  Solicitações Pendentes
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-end gap-2">
-                  <div className="text-4xl font-bold text-yellow-400">3</div>
-                  <span className="text-xs text-red-400 mb-1">Atender hoje</span>
-                </div>
-              </CardContent>
-            </Card>
+                {/* 2. Meta Mensal de Influenciadores */}
+                <Card className="bg-white/5 border-white/10 hover:bg-white/8 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/10">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                      <span className="text-xl">🎯</span>
+                      Meta Mensal de Influenciadores
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-end gap-2">
+                        <div className="text-4xl font-bold text-yellow-400">
+                          {stats.addedThisMonth || 0}
+                        </div>
+                        <span className="text-xs text-gray-400 mb-1">/ {stats.monthlyGoal || 3}</span>
+                      </div>
+                      {/* Barra de progresso */}
+                      <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-yellow-500 to-yellow-400 transition-all duration-500"
+                          style={{ width: `${Math.min(stats.progressPercentage || 0, 100)}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-xs text-gray-400">
+                        {stats.addedThisMonth >= (stats.monthlyGoal || 3)
+                          ? `Progresso: ${stats.addedThisMonth}/${stats.monthlyGoal || 3} – ${
+                              stats.addedThisMonth > (stats.monthlyGoal || 3)
+                                ? `Você está +${stats.addedThisMonth - (stats.monthlyGoal || 3)} acima da meta. Excelente!`
+                                : "Meta atingida."
+                            }`
+                          : `Progresso: ${stats.addedThisMonth || 0}/${stats.monthlyGoal || 3} – Faltam ${(stats.monthlyGoal || 3) - (stats.addedThisMonth || 0)} para atingir a meta.`}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
 
-            <Card className="bg-white/5 border-white/10 hover:bg-white/8 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/10">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                  <span className="text-xl">⭐</span>
-                  Nicho Mais Popular
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-end gap-2">
-                  <div className="text-4xl font-bold text-green-400">Beleza</div>
-                  <span className="text-xs text-gray-400 mb-1">45% do catálogo</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                {/* 3. Nicho Mais Presente */}
+                <Card className="bg-white/5 border-white/10 hover:bg-white/8 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/10">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                      <span className="text-xl">⭐</span>
+                      Nicho Mais Presente
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-end gap-2">
+                      <div className="text-2xl font-bold text-green-400">
+                        {stats.topNiche?.name || "—"}
+                      </div>
+                      {stats.topNiche && (
+                        <span className="text-xs text-gray-400 mb-1">
+                          {stats.topNiche.percentage.toFixed(1)}% do catálogo
+                        </span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Segunda linha: Top Influenciadores, Visão Geral, Engajamento */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* 4. Top Influenciadores do Mês */}
+                <Card className="bg-white/5 border-white/10 hover:bg-white/8 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                      <span className="text-xl">🏆</span>
+                      Top Influenciadores do Mês
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {stats.topInfluencers && stats.topInfluencers.length > 0 ? (
+                        stats.topInfluencers.map((inf: any, idx: number) => (
+                          <div key={inf.id} className="flex items-center gap-3">
+                            {inf.photo ? (
+                              <img
+                                src={inf.photo}
+                                alt={inf.name}
+                                className="w-10 h-10 rounded-full object-cover border-2 border-purple-500/30"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm">
+                                {inf.name.substring(0, 2).toUpperCase()}
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-white truncate">{inf.name}</p>
+                              <p className="text-xs text-gray-400">{inf.views} visualizações</p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-gray-400">Nenhuma visualização este mês</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* 5. Visão Geral do Catálogo */}
+                <Card className="bg-white/5 border-white/10 hover:bg-white/8 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                      <span className="text-xl">📊</span>
+                      Visão Geral do Catálogo
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">Acessos ao Catálogo</p>
+                        <div className="flex items-end gap-2">
+                          <div className="text-3xl font-bold text-white">{stats.catalogAccesses || 0}</div>
+                          {stats.catalogGrowth !== undefined && (
+                            <span className={`text-xs mb-1 ${stats.catalogGrowth >= 0 ? "text-green-400" : "text-red-400"}`}>
+                              {stats.catalogGrowth >= 0 ? "+" : ""}{stats.catalogGrowth.toFixed(1)}%
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">Cliques no WhatsApp</p>
+                        <div className="text-2xl font-bold text-green-400">{stats.whatsappClicks || 0}</div>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1">Taxa de Conversão</p>
+                        <div className="text-2xl font-bold text-purple-400">
+                          {stats.conversionRate ? stats.conversionRate.toFixed(2) : "0.00"}%
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* 6. Engajamento Médio do Catálogo */}
+                <Card className="bg-white/5 border-white/10 hover:bg-white/8 transition-all duration-300 hover:shadow-lg hover:shadow-pink-500/10">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                      <span className="text-xl">💫</span>
+                      Engajamento Médio
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="text-4xl font-bold text-pink-400">
+                        {stats.averageEngagement ? stats.averageEngagement.toFixed(1) : "0.0"}%
+                      </div>
+                      <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-pink-500 to-purple-500 transition-all duration-500"
+                          style={{ width: `${Math.min((stats.averageEngagement || 0) * 10, 100)}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-xs text-gray-400">
+                        {stats.averageEngagement >= 5
+                          ? "Alta Performance"
+                          : stats.averageEngagement >= 3
+                          ? "Acima da média"
+                          : "Baixo"}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Terceira linha: Distribuição de Nichos (Gráfico) */}
+              <div className="grid grid-cols-1 gap-4">
+                <Card className="bg-white/5 border-white/10 hover:bg-white/8 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10">
+                  <CardHeader className="pb-3">
+                    <button
+                      onClick={() => setIsNicheDistributionOpen(!isNicheDistributionOpen)}
+                      className="w-full flex items-center justify-between text-left"
+                    >
+                      <CardTitle className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                        <span className="text-xl">📈</span>
+                        Distribuição Geral de Nichos
+                      </CardTitle>
+                      <motion.div
+                        animate={{ rotate: isNicheDistributionOpen ? 180 : 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <ChevronDown className="w-5 h-5 text-gray-400" />
+                      </motion.div>
+                    </button>
+                  </CardHeader>
+                  <AnimatePresence>
+                    {isNicheDistributionOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="overflow-hidden"
+                      >
+                        <CardContent>
+                          <div className="space-y-3">
+                            {stats.nicheDistribution && stats.nicheDistribution.length > 0 ? (
+                              stats.nicheDistribution.map((item: any, idx: number) => (
+                                <div key={idx} className="space-y-1">
+                                  <div className="flex items-center justify-between text-sm">
+                                    <span className="text-white font-medium">{item.niche}</span>
+                                    <span className="text-gray-400">{item.percentage.toFixed(1)}%</span>
+                                  </div>
+                                  <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                                    <div
+                                      className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
+                                      style={{ width: `${item.percentage}%` }}
+                                    ></div>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-sm text-gray-400">Nenhum nicho cadastrado</p>
+                            )}
+                          </div>
+                        </CardContent>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Card>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-400">Erro ao carregar estatísticas</div>
+          )}
         </div>
 
         {/* Filter and Search Section */}

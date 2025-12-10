@@ -168,6 +168,18 @@ export default function InfluencerProfile({ params }: Props) {
         }
         const data = await res.json()
         setInfluencer(data)
+        
+        // Registrar visualização do perfil
+        if (data.id) {
+          fetch("/api/gmfaces/analytics", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              eventType: "profile_view",
+              influencerId: data.id,
+            }),
+          }).catch(console.error)
+        }
       } catch (error) {
         console.error(error)
         notFound()
@@ -194,6 +206,18 @@ export default function InfluencerProfile({ params }: Props) {
   const whatsappMessage = `Olá! Gostaria de solicitar um orçamento para ${influencer.name} do GM Faces.`
   const phoneNumber = influencer.phone?.replace(/\D/g, "") || "553599574977"
   const whatsappLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`
+  
+  const handleWhatsAppClick = () => {
+    // Registrar clique no WhatsApp
+    fetch("/api/gmfaces/analytics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        eventType: "whatsapp_click",
+        influencerId: influencer.id,
+      }),
+    }).catch(console.error)
+  }
 
   // Converter valores para números
   // Verificar se o valor já está formatado com ponto como separador de milhares (ex: "22.200k", "22.200")
@@ -676,6 +700,7 @@ export default function InfluencerProfile({ params }: Props) {
                   href={whatsappLink}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={handleWhatsAppClick}
                   className="flex items-center justify-center gap-2"
                 >
                   <MessageCircle className="w-5 h-5" />

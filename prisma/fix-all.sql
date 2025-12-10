@@ -113,3 +113,4 @@ SELECT 'Script executado com sucesso! Todas as colunas foram adicionadas e nicho
 
 
 
+
