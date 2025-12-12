@@ -2,13 +2,51 @@
 
 import { useRef } from "react"
 import { useScroll } from "framer-motion"
-import HeroSection from "@/components/about-page/hero-section"
-import ServicesSection from "@/components/about-page/services-section"
-import CtaSection from "@/components/about-page/cta-section"
-import ForWhoSection from "@/components/about-page/for-who-section"
-import AboutSection from "@/components/about-page/about-section"
-import ParallaxBackground from "@/components/about-page/parallax-background"
-import Footer from "@/components/landing-page/footer"
+import dynamic from "next/dynamic"
+import { Suspense } from "react"
+import LoadingFallback from "@/components/loading-fallback"
+
+// Lazy load components
+const ParallaxBackground = dynamic(() => import("@/components/home/parallax-background"), {
+  ssr: false,
+  loading: () => (
+    <div className="fixed inset-0 bg-black flex items-center justify-center">
+      <div className="animate-pulse">
+        <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    </div>
+  ),
+})
+
+const HeroSection = dynamic(() => import("@/components/home/hero-section"), {
+  loading: () => <LoadingFallback />,
+})
+
+const StatsSection = dynamic(() => import("@/components/home/stats-section"), {
+  loading: () => <LoadingFallback />,
+})
+
+const FeaturesShowcase = dynamic(() => import("@/components/home/features-showcase"), {
+  loading: () => <LoadingFallback />,
+})
+
+const ServicesCarousel = dynamic(() => import("@/components/home/services-carousel"), {
+  loading: () => <LoadingFallback />,
+})
+
+const TestimonialsSlider = dynamic(() => import("@/components/home/testimonials-slider"), {
+  loading: () => <LoadingFallback />,
+})
+
+const CtaSection = dynamic(() => import("@/components/home/cta-section"), {
+  loading: () => <LoadingFallback />,
+})
+
+
+const PortfolioPreview = dynamic(() => import("@/components/home/portfolio-preview"), {
+  loading: () => <LoadingFallback />,
+})
+
 
 export default function Home() {
   const containerRef = useRef(null)
@@ -17,28 +55,26 @@ export default function Home() {
     offset: ["start start", "end end"],
   })
 
-  // Função para lidar com o clique no botão CTA
-  const handleCtaClick = () => {
-    const phoneNumber = "553599574977"; 
-    const defaultMessage = "Olá, gostaria de mais informações!"; 
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(defaultMessage)}`;
-    
-    window.open(whatsappUrl, "_blank"); 
-  }
-
   return (
-    <div ref={containerRef} className="min-h-screen bg-black text-white overflow-hidden">
-      {/* Parallax Background */}
-      <ParallaxBackground scrollYProgress={scrollYProgress} />
-      <div className="relative z-10">
-        <HeroSection onCtaClick={handleCtaClick} scrollYProgress={scrollYProgress} />
-        <AboutSection />
-        <ServicesSection />
-        <ForWhoSection onCtaClick={handleCtaClick} />
-        <CtaSection onCtaClick={handleCtaClick} />
-        <Footer /> 
+    <>
+      <div ref={containerRef} className="min-h-screen bg-black text-white overflow-hidden">
+        {/* Parallax Background */}
+        <ParallaxBackground scrollYProgress={scrollYProgress} />
+
+        <div className="relative z-20">
+          <Suspense fallback={<LoadingFallback />}>
+            <HeroSection />
+            <div className="relative z-20">
+              <StatsSection />
+              <FeaturesShowcase />
+              <ServicesCarousel />
+              <PortfolioPreview />
+              <TestimonialsSlider />
+              <CtaSection />
+            </div>
+          </Suspense>
+        </div>
       </div>
-    </div>
+    </>
   )
-  
 }

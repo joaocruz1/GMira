@@ -13,3 +13,4 @@ CREATE INDEX IF NOT EXISTS "Analytics_eventType_idx" ON "Analytics"("eventType")
 CREATE INDEX IF NOT EXISTS "Analytics_influencerId_idx" ON "Analytics"("influencerId");
 CREATE INDEX IF NOT EXISTS "Analytics_createdAt_idx" ON "Analytics"("createdAt");
 
+

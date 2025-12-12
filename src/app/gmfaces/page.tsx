@@ -1608,9 +1608,15 @@ export default function GMFacesCatalog() {
               Escolha um influenciador, aprove o roteiro e receba um vídeo profissional pronto para publicar. Simples, rápido e efetivo.
             </p>
             <div className="flex flex-col md:flex-row gap-4 justify-center pt-4">
-              <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-bold px-8 py-6 text-base rounded-lg shadow-lg shadow-purple-600/50 hover:shadow-purple-600/70 transition-all duration-300 transform hover:scale-105">
-                Começar Agora
-              </Button>
+              <Link 
+                href="https://wa.me/553599574977?text=Olá" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-bold px-8 py-6 text-base rounded-lg shadow-lg shadow-purple-600/50 hover:shadow-purple-600/70 transition-all duration-300 transform hover:scale-105">
+                  Começar Agora
+                </Button>
+              </Link>
             </div>
           </div>
         </FadeIn>

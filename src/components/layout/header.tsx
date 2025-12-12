@@ -57,8 +57,8 @@ function Header() {
     }`, [scrolled]
   )
 
-  // Não renderizar o header na página raiz (landingpage) e na página gmfaces (tem header próprio)
-  if (pathname === "/" || pathname.startsWith("/gmfaces")) {
+  // Não renderizar o header na página gmfaces (tem header próprio)
+  if (pathname.startsWith("/gmfaces")) {
     return null
   }
 
@@ -76,7 +76,12 @@ function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
-              <NavLink key={item.path} href={item.path} label={item.label} isActive={pathname === item.path} />
+              <NavLink 
+                key={item.path} 
+                href={item.path} 
+                label={item.label} 
+                isActive={item.path === "/gmfaces" ? pathname.startsWith("/gmfaces") : pathname === item.path} 
+              />
             ))}
             <Button
               size="sm"
@@ -139,7 +144,9 @@ function Header() {
                       <Link
                         href={item.path}
                         className={`text-xl font-bold transition-colors duration-300 ${
-                          pathname === item.path ? "text-purple-500" : "text-white hover:text-purple-400"
+                          (item.path === "/gmfaces" ? pathname.startsWith("/gmfaces") : pathname === item.path) 
+                            ? "text-purple-500" 
+                            : "text-white hover:text-purple-400"
                         }`}
                       >
                         {item.label}
@@ -205,7 +212,7 @@ const navItems = [
   { path: "/", label: "Home" },
   { path: "/servicos", label: "Serviços" },
   { path: "/sobre", label: "Sobre" },
-  { path: "/portfolio", label: "Portfólio" },
+  { path: "/gmfaces", label: "Gmfaces" },
 ]
 
 export default memo(Header)
