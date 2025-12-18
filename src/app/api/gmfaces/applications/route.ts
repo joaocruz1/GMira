@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { sendApplicationEmail } from "@/lib/email"
 
 export async function POST(req: NextRequest) {
   try {
@@ -79,6 +80,28 @@ export async function POST(req: NextRequest) {
         gender: gender ?? "OUTRO",
         status: "PENDING",
       },
+    })
+
+    // Enviar email de notificação (não bloqueia a resposta em caso de erro)
+    sendApplicationEmail({
+      name,
+      email,
+      phone,
+      instagram,
+      niche: JSON.stringify(nicheData),
+      city,
+      followers,
+      views30Days,
+      reach30Days,
+      averageReels,
+      localAudience,
+      priceVideo,
+      priceCopart,
+      bio,
+      gender,
+    }).catch((error) => {
+      console.error("Erro ao enviar email de notificação:", error)
+      // Não falha o cadastro se o email falhar
     })
 
     return NextResponse.json(

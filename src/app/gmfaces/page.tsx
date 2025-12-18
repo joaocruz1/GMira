@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import FadeIn from "@/components/ui/fade-in"
-import { Menu, X, ChevronDown, Lock } from "lucide-react"
+import { Menu, X, ChevronDown, Lock, ChevronRight } from "lucide-react"
 
 const niches = [
   "Todos",
@@ -389,6 +389,7 @@ export default function GMFacesCatalog() {
   const [isLoadingInfluencers, setIsLoadingInfluencers] = useState(true)
   const [formSubmitting, setFormSubmitting] = useState(false)
   const [formMessage, setFormMessage] = useState<string | null>(null)
+  const [mobileCardsToShow, setMobileCardsToShow] = useState(3)
 
   useEffect(() => {
     const loadInfluencers = async () => {
@@ -469,6 +470,11 @@ export default function GMFacesCatalog() {
 
     return matchesSearch && matchesNiche && matchesCity && matchesGender
   })
+
+  // Resetar cards visíveis quando os filtros mudarem
+  useEffect(() => {
+    setMobileCardsToShow(3)
+  }, [searchTerm, selectedNiche, selectedCity, selectedGender])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-slate-950 to-black text-white pb-20 overflow-hidden">
@@ -650,186 +656,207 @@ export default function GMFacesCatalog() {
           {isLoadingInfluencers ? (
             <div className="col-span-full text-center py-24 text-gray-400">Carregando catálogo...</div>
           ) : filteredInfluencers.length > 0 ? (
-            filteredInfluencers.map((influencer, index) => (
-              <FadeIn key={influencer.id} delay={index * 0.05}>
-                <div
-                  className="group relative h-full"
-                  onMouseEnter={() => setHoveredId(influencer.id)}
-                  onMouseLeave={() => setHoveredId(null)}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-lg"></div>
+            <>
+              {/* Em mobile, mostra apenas os primeiros mobileCardsToShow cards */}
+              {/* Em desktop (md:), mostra todos os cards */}
+              {filteredInfluencers.map((influencer, index) => {
+                // Em mobile, esconde cards além do mobileCardsToShow
+                const isVisible = index < mobileCardsToShow
+                return (
+                  <FadeIn key={influencer.id} delay={index * 0.05}>
+                    <div
+                      className={`group relative h-full ${isVisible ? 'block' : 'hidden md:block'}`}
+                      onMouseEnter={() => setHoveredId(influencer.id)}
+                      onMouseLeave={() => setHoveredId(null)}
+                    >
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-lg"></div>
 
-                  <Card className="relative bg-slate-950/50 border border-white/10 hover:border-purple-500/50 transition-all duration-500 overflow-hidden h-full flex flex-col backdrop-blur-xl hover:shadow-2xl hover:shadow-purple-600/20 transform group-hover:scale-105 group-hover:-translate-y-2">
-                    {/* Foto do influenciador */}
-                    <div className="aspect-square bg-gradient-to-br from-purple-950 via-slate-900 to-slate-950 relative overflow-hidden">
-                      {influencer.photo ? (
-                        <>
-                          <img
-                            src={influencer.photo}
-                            alt={influencer.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-br from-purple-950/40 to-pink-900/40 opacity-60"></div>
-                        </>
-                      ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <div className="absolute inset-0 bg-gradient-to-br from-purple-950/40 to-pink-900/40 opacity-60"></div>
-                          <svg
-                            className="w-20 h-20 text-purple-400/40 mb-2 relative z-10"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                          </svg>
-                          <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 relative z-10 tracking-wider">
-                            {influencer.name.substring(0, 2).toUpperCase()}
-                          </span>
-                        </div>
-                      )}
+                    <Card className="relative bg-slate-950/50 border border-white/10 hover:border-purple-500/50 transition-all duration-500 overflow-hidden h-full flex flex-col backdrop-blur-xl hover:shadow-2xl hover:shadow-purple-600/20 transform group-hover:scale-105 group-hover:-translate-y-2">
+                      {/* Foto do influenciador */}
+                      <div className="aspect-square bg-gradient-to-br from-purple-950 via-slate-900 to-slate-950 relative overflow-hidden">
+                        {influencer.photo ? (
+                          <>
+                            <img
+                              src={influencer.photo}
+                              alt={influencer.name}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-950/40 to-pink-900/40 opacity-60"></div>
+                          </>
+                        ) : (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-950/40 to-pink-900/40 opacity-60"></div>
+                            <svg
+                              className="w-20 h-20 text-purple-400/40 mb-2 relative z-10"
+                              fill="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                            </svg>
+                            <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 relative z-10 tracking-wider">
+                              {influencer.name.substring(0, 2).toUpperCase()}
+                            </span>
+                          </div>
+                        )}
 
-                      {/* Badge da categoria - Nicho Principal */}
-                      <div className="absolute top-3 right-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg backdrop-blur-sm border border-purple-400/30 z-20">
-                        {(() => {
-                          try {
-                            const nicheData = JSON.parse(influencer.niche || "[]")
-                            if (typeof nicheData === "object" && nicheData !== null && nicheData.mainNiche) {
-                              return nicheData.mainNiche
-                            }
-                            if (Array.isArray(nicheData) && nicheData.length > 0) {
-                              return nicheData[0]
-                            }
-                            return influencer.niche
-                          } catch {
-                            return influencer.niche
-                          }
-                        })()}
-                      </div>
-                    </div>
-
-                    <CardHeader className="pb-4">
-                      {/* Nichos - Principal maior e outros menores */}
-                      <div className="mb-3">
+                        {/* Badge da categoria - Nicho Principal */}
+                        <div className="absolute top-3 right-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg backdrop-blur-sm border border-purple-400/30 z-20">
                           {(() => {
                             try {
                               const nicheData = JSON.parse(influencer.niche || "[]")
-                            if (typeof nicheData === "object" && nicheData !== null && nicheData.niches && nicheData.mainNiche) {
-                              const mainNiche = nicheData.mainNiche
-                              const otherNiches = nicheData.niches.filter((n: string) => n !== mainNiche)
-                              
-                              return (
-                                <div className="space-y-1.5">
-                                  {/* Nicho Principal - Maior */}
-                                  <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">
-                                    {mainNiche.toUpperCase()}
-                                  </p>
-                                  {/* Outros Nichos - Menores */}
-                                  {otherNiches.length > 0 && (
-                                    <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-                                      {otherNiches.map((niche: string, idx: number) => (
-                                        <span
-                                          key={idx}
-                                          className="text-[9px] text-gray-500 font-normal uppercase tracking-wide opacity-70"
-                                        >
-                                          {niche}
-                                          {idx < otherNiches.length - 1 && <span className="mx-1 text-gray-600">•</span>}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              )
+                              if (typeof nicheData === "object" && nicheData !== null && nicheData.mainNiche) {
+                                return nicheData.mainNiche
                               }
                               if (Array.isArray(nicheData) && nicheData.length > 0) {
-                              return (
-                                <div className="space-y-1.5">
-                                  <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">
-                                    {nicheData[0].toUpperCase()}
-                                  </p>
-                                  {nicheData.length > 1 && (
-                                    <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-                                      {nicheData.slice(1).map((niche: string, idx: number) => (
-                                        <span
-                                          key={idx}
-                                          className="text-[9px] text-gray-500 font-normal uppercase tracking-wide opacity-70"
-                                        >
-                                          {niche}
-                                          {idx < nicheData.slice(1).length - 1 && <span className="mx-1 text-gray-600">•</span>}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              )
+                                return nicheData[0]
                               }
-                            } catch {}
-                          return (
-                            <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">
-                              {influencer.niche.toUpperCase()}
+                              return influencer.niche
+                            } catch {
+                              return influencer.niche
+                            }
+                          })()}
+                        </div>
+                      </div>
+
+                      <CardHeader className="pb-4">
+                        {/* Nichos - Principal maior e outros menores */}
+                        <div className="mb-3">
+                            {(() => {
+                              try {
+                                const nicheData = JSON.parse(influencer.niche || "[]")
+                              if (typeof nicheData === "object" && nicheData !== null && nicheData.niches && nicheData.mainNiche) {
+                                const mainNiche = nicheData.mainNiche
+                                const otherNiches = nicheData.niches.filter((n: string) => n !== mainNiche)
+                                
+                                return (
+                                  <div className="space-y-1.5">
+                                    {/* Nicho Principal - Maior */}
+                                    <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">
+                                      {mainNiche.toUpperCase()}
+                                    </p>
+                                    {/* Outros Nichos - Menores */}
+                                    {otherNiches.length > 0 && (
+                                      <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                                        {otherNiches.map((niche: string, idx: number) => (
+                                          <span
+                                            key={idx}
+                                            className="text-[9px] text-gray-500 font-normal uppercase tracking-wide opacity-70"
+                                          >
+                                            {niche}
+                                            {idx < otherNiches.length - 1 && <span className="mx-1 text-gray-600">•</span>}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                )
+                                }
+                                if (Array.isArray(nicheData) && nicheData.length > 0) {
+                                return (
+                                  <div className="space-y-1.5">
+                                    <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">
+                                      {nicheData[0].toUpperCase()}
+                                    </p>
+                                    {nicheData.length > 1 && (
+                                      <div className="flex flex-wrap gap-x-2 gap-y-0.5">
+                                        {nicheData.slice(1).map((niche: string, idx: number) => (
+                                          <span
+                                            key={idx}
+                                            className="text-[9px] text-gray-500 font-normal uppercase tracking-wide opacity-70"
+                                          >
+                                            {niche}
+                                            {idx < nicheData.slice(1).length - 1 && <span className="mx-1 text-gray-600">•</span>}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                )
+                                }
+                              } catch {}
+                            return (
+                              <p className="text-xs font-bold text-purple-400 uppercase tracking-widest">
+                                {influencer.niche.toUpperCase()}
+                          </p>
+                            )
+                          })()}
+                        </div>
+
+                        {/* Nome */}
+                        <CardTitle className="text-2xl font-bold text-white mb-3 group-hover:text-purple-300 transition-colors duration-300">
+                          {influencer.name}
+                        </CardTitle>
+
+                        {/* Localização */}
+                        <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300 flex items-center gap-1 mb-4">
+                          📍 {influencer.city}
                         </p>
-                          )
-                        })()}
-                      </div>
 
-                      {/* Nome */}
-                      <CardTitle className="text-2xl font-bold text-white mb-3 group-hover:text-purple-300 transition-colors duration-300">
-                        {influencer.name}
-                      </CardTitle>
+                        {/* Descrição curta */}
+                        <p className="text-gray-300 text-sm leading-relaxed group-hover:text-gray-200 transition-colors duration-300 mb-4">
+                          {influencer.bio}
+                        </p>
+                      </CardHeader>
 
-                      {/* Localização */}
-                      <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300 flex items-center gap-1 mb-4">
-                        📍 {influencer.city}
-                      </p>
+                      <CardContent className="flex-grow pb-4 space-y-3">
+                        {/* Seguidores */}
+                        {influencer.followers && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-gray-300">
+                              <span className="font-semibold text-white">Seguidores:</span>{" "}
+                              {influencer.followers}
+                          </span>
+                        </div>
+                        )}
 
-                      {/* Descrição curta */}
-                      <p className="text-gray-300 text-sm leading-relaxed group-hover:text-gray-200 transition-colors duration-300 mb-4">
-                        {influencer.bio}
-                      </p>
-                    </CardHeader>
+                        {/* Vizualizações 30 dias */}
+                        {influencer.views30Days && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-gray-300">
+                              <span className="font-semibold text-white">Vizualizações 30 dias:</span>{" "}
+                              {influencer.views30Days || "—"}
+                          </span>
+                        </div>
+                        )}
 
-                    <CardContent className="flex-grow pb-4 space-y-3">
-                      {/* Seguidores */}
-                      {influencer.followers && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="text-gray-300">
-                            <span className="font-semibold text-white">Seguidores:</span>{" "}
-                            {influencer.followers}
-                        </span>
-                      </div>
-                      )}
+                        {/* Média por reels */}
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-gray-300">
+                            <span className="font-semibold text-white">Média por reels:</span>{" "}
+                            {influencer.averageReels || "—"}
+                          </span>
+                        </div>
 
-                      {/* Vizualizações 30 dias */}
-                      {influencer.views30Days && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="text-gray-300">
-                            <span className="font-semibold text-white">Vizualizações 30 dias:</span>{" "}
-                            {influencer.views30Days || "—"}
-                        </span>
-                      </div>
-                      )}
+                       
+                      </CardContent>
 
-                      {/* Média por reels */}
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="text-gray-300">
-                          <span className="font-semibold text-white">Média por reels:</span>{" "}
-                          {influencer.averageReels || "—"}
-                        </span>
-                      </div>
-
-                     
-                    </CardContent>
-
-                    <CardFooter className="pt-4 border-t border-white/5">
-                      <Button
-                        asChild
-                        className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-bold shadow-lg hover:shadow-purple-600/50 transition-all duration-300 transform group-hover:scale-105"
-                      >
-                        <Link href={`/gmfaces/${influencer.slug || influencer.id}`}>👉 Ver Perfil</Link>
-                      </Button>
-                    </CardFooter>
-                  </Card>
+                      <CardFooter className="pt-4 border-t border-white/5">
+                        <Button
+                          asChild
+                          className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-bold shadow-lg hover:shadow-purple-600/50 transition-all duration-300 transform group-hover:scale-105"
+                        >
+                          <Link href={`/gmfaces/${influencer.slug || influencer.id}`}>👉 Ver Perfil</Link>
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </div>
+                </FadeIn>
+              )
+              })}
+              
+              {/* Botão "Ver Mais" apenas em mobile */}
+              {mobileCardsToShow < filteredInfluencers.length && (
+                <div className="col-span-full md:hidden flex justify-center mt-6">
+                  <Button
+                    onClick={() => setMobileCardsToShow(filteredInfluencers.length)}
+                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-bold px-8 py-4 rounded-lg shadow-lg shadow-purple-600/50 hover:shadow-purple-600/70 transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                  >
+                    Ver Mais Influenciadores
+                    <ChevronRight className="w-5 h-5" />
+                  </Button>
                 </div>
-              </FadeIn>
-            ))
+              )}
+            </>
           ) : (
             <div className="col-span-full text-center py-32">
               <div className="space-y-4">
@@ -1550,18 +1577,6 @@ export default function GMFacesCatalog() {
                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
                         placeholder="Ex: 150"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Preço Final (R$) *</label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.priceFinal}
-                        onChange={(e) => setFormData({ ...formData, priceFinal: e.target.value })}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                        placeholder="Ex: 400"
-                      />
-                      <p className="text-xs text-purple-300 mt-1">Este é o preço que será usado</p>
                     </div>
                   </div>
                   <div>

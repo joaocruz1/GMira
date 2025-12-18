@@ -14,3 +14,4 @@ CREATE INDEX IF NOT EXISTS "Analytics_influencerId_idx" ON "Analytics"("influenc
 CREATE INDEX IF NOT EXISTS "Analytics_createdAt_idx" ON "Analytics"("createdAt");
 
 
+
