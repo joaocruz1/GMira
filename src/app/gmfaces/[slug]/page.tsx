@@ -218,7 +218,7 @@ export default function InfluencerProfile({ params }: Props) {
   }
 
   const whatsappMessage = `Olá! Gostaria de solicitar um orçamento para ${influencer.name} do GM Faces.`
-  const phoneNumber = influencer.phone?.replace(/\D/g, "") || "553599574977"
+  const phoneNumber = "553599574977" // Sempre usar o número fixo da GMira
   const whatsappLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(whatsappMessage)}`
   
   const handleWhatsAppClick = () => {

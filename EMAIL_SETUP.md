@@ -62,3 +62,4 @@ Após configurar as variáveis, quando um influenciador se cadastrar através do
 
 Se as variáveis de ambiente não estiverem configuradas, o sistema continuará funcionando normalmente (salvando no banco de dados), mas não enviará emails. Um aviso será registrado no console.
 
+

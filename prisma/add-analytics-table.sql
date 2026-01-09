@@ -15,3 +15,4 @@ CREATE INDEX IF NOT EXISTS "Analytics_createdAt_idx" ON "Analytics"("createdAt")
 
 
 
+
