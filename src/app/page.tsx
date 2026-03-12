@@ -2,7 +2,6 @@
 
 import { useRef } from "react"
 import { useScroll } from "framer-motion"
-import HeroSection from "@/components/about-page/hero-section"
 import ServicesSection from "@/components/about-page/services-section"
 import CtaSection from "@/components/about-page/cta-section"
 import ForWhoSection from "@/components/about-page/for-who-section"
@@ -31,12 +30,11 @@ export default function Home() {
       {/* Parallax Background */}
       <ParallaxBackground scrollYProgress={scrollYProgress} />
       <div className="relative z-10">
-        <HeroSection onCtaClick={handleCtaClick} scrollYProgress={scrollYProgress} />
         <ServicesSection onCtaClick={handleCtaClick} />
         <ForWhoSection onCtaClick={handleCtaClick} />
         <AboutSection />
         <CtaSection onCtaClick={handleCtaClick} />
-        <Footer /> 
+        <Footer />
       </div>
     </div>
   )
